@@ -1,0 +1,7 @@
+# Configuration for Multi Agent Exploration
+
+no_of_agents: 3
+sensor_range: 30
+# grid_len: 612
+# grid_width: 612
+# complexity_level: 'easy' # very easy,easy,moderate,difficult
