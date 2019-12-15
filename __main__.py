@@ -9,6 +9,7 @@ from cv2 import cv2
 from occupancy_grid_generator.occupancy_grid_generator import OccupancyGridGenerator
 from agent.agent_handler import AgentHandler
 from mapping.mapper import Mapper
+from region_assignment.k_mean_clustring import KMeanClustring
 from config.Config import Config
 
 #############################################################################################
@@ -25,71 +26,75 @@ temp_occupancy_grid_with_obs = occupancy_grid.get_occupancy_grid_with_obs()
 
 # #############################################################################################
 
-agenthandler = AgentHandler()
+KMeanClustring(temp_occupancy_grid_without_obs)
 
 # #############################################################################################
 
-grid_mapper = Mapper(global_grid=temp_occupancy_grid_with_obs)
+# agenthandler = AgentHandler()
 
-display = copy.copy(temp_occupancy_grid_with_obs)
-font = cv2.FONT_HERSHEY_SIMPLEX
+# # #############################################################################################
 
-while(1):
+# grid_mapper = Mapper(global_grid=temp_occupancy_grid_with_obs)
 
-    display = copy.copy(temp_occupancy_grid_with_obs)
+# display = copy.copy(temp_occupancy_grid_with_obs)
+# font = cv2.FONT_HERSHEY_SIMPLEX
 
-    for i in range(Config.NO_OF_AGENTS):
+# while(1):
 
-        temp_pos = agenthandler.get_pos_of_agent(i)
+#     display = copy.copy(temp_occupancy_grid_with_obs)
 
-        temp_pos_x = temp_pos['x']
-        temp_pos_y = temp_pos['y']
+#     for i in range(Config.NO_OF_AGENTS):
 
-        if i == 0:
-            color_b,color_g,color_r = 255,0,0
-        elif i == 1:
-            color_b,color_g,color_r = 0,255,0
-        else:
-            color_b,color_g,color_r = 0,0,255
+#         temp_pos = agenthandler.get_pos_of_agent(i)
 
-        cv2.circle(temp_occupancy_grid_with_obs, (temp_pos_x, temp_pos_y), 1, (color_b,color_g,color_r), -1)
+#         temp_pos_x = temp_pos['x']
+#         temp_pos_y = temp_pos['y']
 
-        img = cv2.ellipse(display,(temp_pos_x,temp_pos_y),(10,10),0,15,345,(color_b,color_g,color_r),-1)
+#         if i == 0:
+#             color_b,color_g,color_r = 255,0,0
+#         elif i == 1:
+#             color_b,color_g,color_r = 0,255,0
+#         else:
+#             color_b,color_g,color_r = 0,0,255
 
-        grid_mapper.map_grid(agent_no=i, agent_pos=temp_pos)
+#         cv2.circle(temp_occupancy_grid_with_obs, (temp_pos_x, temp_pos_y), 1, (color_b,color_g,color_r), -1)
+
+#         img = cv2.ellipse(display,(temp_pos_x,temp_pos_y),(10,10),0,15,345,(color_b,color_g,color_r),-1)
+
+#         grid_mapper.map_grid(agent_no=i, agent_pos=temp_pos)
     
-    temp_img = cv2.resize(img, (512, 512))
+#     temp_img = cv2.resize(img, (512, 512))
 
-    mapped_grid = grid_mapper.get_mapped_grid()
+#     mapped_grid = grid_mapper.get_mapped_grid()
     
-    temp_mapped_img = cv2.resize(mapped_grid, (512, 512))
+#     temp_mapped_img = cv2.resize(mapped_grid, (512, 512))
 
-    numpy_horizontal = np.hstack((temp_img, temp_mapped_img))
+#     numpy_horizontal = np.hstack((temp_img, temp_mapped_img))
 
-    cv2.imshow('image', numpy_horizontal)
-    k = cv2.waitKey(1) & 0xFF
+#     cv2.imshow('image', numpy_horizontal)
+#     k = cv2.waitKey(1) & 0xFF
 
-    if k == ord('q'):
-        break
-    if k == ord('1'):
-        agent_number = 0
-    if k == ord('2'):
-        agent_number = 1
-    if k == ord('3'):
-        agent_number = 2
-    if k == ord('w'):
-        agenthandler.move_agent(agent_number, 0, -5)
-    if k == ord('s'):
-        agenthandler.move_agent(agent_number, 0, 5)
-    if k == ord('a'):
-        agenthandler.move_agent(agent_number, -5, 0)
-    if k == ord('d'):
-        agenthandler.move_agent(agent_number, 5, 0)
+#     if k == ord('q'):
+#         break
+#     if k == ord('1'):
+#         agent_number = 0
+#     if k == ord('2'):
+#         agent_number = 1
+#     if k == ord('3'):
+#         agent_number = 2
+#     if k == ord('w'):
+#         agenthandler.move_agent(agent_number, 0, -5)
+#     if k == ord('s'):
+#         agenthandler.move_agent(agent_number, 0, 5)
+#     if k == ord('a'):
+#         agenthandler.move_agent(agent_number, -5, 0)
+#     if k == ord('d'):
+#         agenthandler.move_agent(agent_number, 5, 0)
 
 
-cv2.destroyAllWindows()
-# grid_mapper.show_mapped_grid()
-
-# cv2.imshow('Occupancy_grid',img)
-# cv2.waitKey(0)
 # cv2.destroyAllWindows()
+# # grid_mapper.show_mapped_grid()
+
+# # cv2.imshow('Occupancy_grid',img)
+# # cv2.waitKey(0)
+# # cv2.destroyAllWindows()

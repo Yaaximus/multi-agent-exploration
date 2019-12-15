@@ -18,7 +18,7 @@ default_config = {
     'grid_len': 612,
     'grid_width': 1024,
     'free_space': 100,
-    'complexity_level': 'difficult'
+    'complexity_level': 'very easy'
 }
 
 
