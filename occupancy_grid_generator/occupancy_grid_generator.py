@@ -36,8 +36,11 @@ class OccupancyGridGenerator(object):
 
         temp_grid = copy.copy(self._grid_without_obs)
 
-        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2),150), (int(self._grid_width/2),self._grid_len-150), (0,0,0), 4)
-        temp_grid = cv2.line(temp_grid, (150, int(self._grid_len/2)), (self._grid_width-150,int(self._grid_len/2)), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2),150), (int(self._grid_width/2),int(self._grid_len/2.0)-50), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2), int(self._grid_len/2.0)+50), (int(self._grid_width/2),self._grid_len-150), (0,0,0), 4)
+        
+        temp_grid = cv2.line(temp_grid, (150, int(self._grid_len/2)), (int(self._grid_width/2)-50,int(self._grid_len/2)), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2)+50, int(self._grid_len/2)), (self._grid_width-150,int(self._grid_len/2)), (0,0,0), 4)
 
         self._grid_without_obs = temp_grid
         self._add_ostacles(no_of_obs=2)
@@ -47,8 +50,12 @@ class OccupancyGridGenerator(object):
 
         temp_grid = copy.copy(self._grid_without_obs)
 
-        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2),150), (int(self._grid_width/2),self._grid_len-150), (0,0,0), 4)
-        temp_grid = cv2.line(temp_grid, (150, int(self._grid_len/2)), (self._grid_width-150,int(self._grid_len/2)), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2),150), (int(self._grid_width/2),int(self._grid_len/2.0)-50), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2), int(self._grid_len/2.0)+50), (int(self._grid_width/2),self._grid_len-150), (0,0,0), 4)
+        
+        temp_grid = cv2.line(temp_grid, (150, int(self._grid_len/2)), (int(self._grid_width/2)-50,int(self._grid_len/2)), (0,0,0), 4)
+        temp_grid = cv2.line(temp_grid, (int(self._grid_width/2)+50, int(self._grid_len/2)), (self._grid_width-150,int(self._grid_len/2)), (0,0,0), 4)
+        
         temp_grid = cv2.line(temp_grid, (int((self._grid_width/2)-self._grid_width/5), self._free_space), (int((self._grid_width/2)-self._grid_width/5), int(self._grid_len/4)), (0,0,0), 4)
         temp_grid = cv2.line(temp_grid, (int((self._grid_width/2)+self._grid_width/5), self._free_space), (int((self._grid_width/2)+self._grid_width/5), int(self._grid_len/4)), (0,0,0), 4)
         temp_grid = cv2.line(temp_grid, (int((self._grid_width/2)-self._grid_width/5), self._grid_len-self._free_space), (int((self._grid_width/2)-self._grid_width/5), int(self._grid_len-(self._grid_len/4))), (0,0,0), 4)

@@ -10,9 +10,11 @@ from occupancy_grid_generator.occupancy_grid_generator import OccupancyGridGener
 from agent.agent_handler import AgentHandler
 from mapping.mapper import Mapper
 from region_assignment.k_mean_clustring import KMeanClustring
+from region_assignment.hungarian_region_assignment import HungarianRegionAssignment
 from config.Config import Config
+from utils.util_functions import get_cost_matrix
 
-#############################################################################################
+##############################--OCCUPANCY GRID GENERATOR--#####################################
 
 occupancy_grid = OccupancyGridGenerator()
 
@@ -24,15 +26,67 @@ occupancy_grid.generate_occupancy_grid()
 temp_occupancy_grid_without_obs = occupancy_grid.get_occupancy_grid_without_obs()
 temp_occupancy_grid_with_obs = occupancy_grid.get_occupancy_grid_with_obs()
 
-# #############################################################################################
+# ###########################------K-MEAN-CLUSTRING------#######################################
 
-KMeanClustring(temp_occupancy_grid_without_obs)
+regions = KMeanClustring(temp_occupancy_grid_without_obs)
 
-# #############################################################################################
+regions.find_regions()
 
-# agenthandler = AgentHandler()
+temp_regions_xy_points = regions.get_regions_xy_points()
+temp_region_centroids = regions.get_centroids()
+temp_color_map = regions.get_color_map()
+temp_grid_with_regions = copy.copy(regions.get_grid_with_regions())
 
-# # #############################################################################################
+# regions.show_regions_with_centroids()
+# regions.show_regions()
+
+# ind = 0
+# for el in temp_regions_xy_points:
+#     print("Region", ind, "indices:", el)
+#     ind += 1
+print("Region centroids:", temp_region_centroids)
+print("Region color map:", temp_color_map)
+
+# ###########################-------AGENT HANDLER-------##########################################
+
+agenthandler = AgentHandler()
+
+# ###########################-----REGION ASSIGNMENT-----##########################################
+
+region_centroids = copy.copy(temp_region_centroids)
+
+cost_matrix = get_cost_matrix(Config.NO_OF_AGENTS, agenthandler, region_centroids)
+
+hungaian_region_assignment = HungarianRegionAssignment(cost_matrix, temp_grid_with_regions)
+
+hungaian_region_assignment.find_regions()
+temp_regions_rows, temp_regions_cols = hungaian_region_assignment.get_regions()
+# print(hungaian_region_assignment.get_total_cost())
+
+hungaian_region_assignment.show_assigned_regions(agenthandler, region_centroids)
+
+print("Region centroids:\n")
+ind = 1
+for el in region_centroids:
+    print("\tRegion:", ind, ", x:", el[0], ", y:", el[1])
+    ind += 1
+    
+print("\nAgent Positions:\n")
+
+for i in range(Config.NO_OF_AGENTS):
+    temp_agent_pos = agenthandler.get_pos_of_agent(i)
+    print("\tAgent:", i+1, ", x:", temp_agent_pos['x'], ", y:", temp_agent_pos['y'])
+    
+print("\nCost Matrix:\n\n", cost_matrix, "\n")
+
+ind = 1
+for el in temp_regions_cols:
+    print("Region Assigned to Agent: {} is Region {}".format(ind, el))
+    ind += 1
+    
+print("\nTotal cost:", hungaian_region_assignment.get_total_cost())
+
+# ###########################-------GRID MAPPER---------##########################################
 
 # grid_mapper = Mapper(global_grid=temp_occupancy_grid_with_obs)
 

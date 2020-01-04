@@ -3,9 +3,8 @@
 # import copy
 import math
 
-# import numpy as np
+import numpy as np
 
-# from cv2 import cv2
 
 def l2_distance(coord1_x, coord1_y, coord2_x, coord2_y):
     '''
@@ -32,3 +31,19 @@ def l2_distance(coord1_x, coord1_y, coord2_x, coord2_y):
     dist_y = coord2_y - coord1_y
 
     return math.sqrt((dist_x * dist_x) + (dist_y * dist_y))# * 1.113195e5
+
+
+def get_cost_matrix(no_of_agents, agenthandler, region_centroids):
+
+    cost_matrix = np.zeros(shape=[no_of_agents, no_of_agents])
+
+    for i in range(no_of_agents):
+        temp_agent_pos = agenthandler.get_pos_of_agent(i)
+        a = np.array([temp_agent_pos['x'], temp_agent_pos['y']])
+        for j in range(len(region_centroids)):
+            b = np.array(region_centroids[j])
+            cost_matrix[i,j] = np.linalg.norm(a-b)
+
+    return cost_matrix
+
+
