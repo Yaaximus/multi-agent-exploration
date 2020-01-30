@@ -13,6 +13,7 @@ from region_assignment.k_mean_clustring import KMeanClustring
 from region_assignment.hungarian_region_assignment import HungarianRegionAssignment
 from config.Config import Config
 from utils.util_functions import get_cost_matrix
+from grid_world_generator.grid_world import GridWorld
 
 ##############################--OCCUPANCY GRID GENERATOR--#####################################
 
@@ -85,6 +86,21 @@ for el in temp_regions_cols:
     ind += 1
     
 print("\nTotal cost:", hungaian_region_assignment.get_total_cost())
+
+
+# ###########################--------GRID WORLD---------##########################################
+
+EDGE_COST = 40
+X_DIM = int(Config.GRID_WIDTH/EDGE_COST)
+Y_DIM = int(Config.GRID_LEN/EDGE_COST)
+VIEWING_RANGE = Config.SENSOR_RANGE
+print(EDGE_COST, X_DIM, Y_DIM, VIEWING_RANGE)
+
+graph = GridWorld(X_DIM, Y_DIM, EDGE_COST, temp_occupancy_grid_without_obs)
+
+graph.show_graph_on_occupncy_grid()
+# print(graph.graph['x0y0'])
+
 
 # ###########################-------GRID MAPPER---------##########################################
 

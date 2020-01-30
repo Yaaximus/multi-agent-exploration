@@ -47,3 +47,19 @@ def get_cost_matrix(no_of_agents, agenthandler, region_centroids):
     return cost_matrix
 
 
+def stateNameToCoords(name, edge_cost):
+    # print(name.split('x'))
+    # print(name.split('x')[1])
+    # print(name.split('x')[1].split('y'))
+    # print(int(name.split('x')[1].split('y')[0]))
+    # print(int(name.split('x')[1].split('y')[1]))
+
+    val_1 = int(name.split('x')[1].split('y')[0])*edge_cost
+    val_2 = int(name.split('x')[1].split('y')[1])*edge_cost
+
+    if val_1 == 0:
+      val_1 = edge_cost
+    if val_2 == 0:
+      val_2 = edge_cost
+
+    return [val_1, val_2]
