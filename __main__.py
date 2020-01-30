@@ -94,11 +94,14 @@ EDGE_COST = 40
 X_DIM = int(Config.GRID_WIDTH/EDGE_COST)
 Y_DIM = int(Config.GRID_LEN/EDGE_COST)
 VIEWING_RANGE = Config.SENSOR_RANGE
-print(EDGE_COST, X_DIM, Y_DIM, VIEWING_RANGE)
+# print(EDGE_COST, X_DIM, Y_DIM, VIEWING_RANGE)
 
 graph = GridWorld(X_DIM, Y_DIM, EDGE_COST, temp_occupancy_grid_without_obs)
 
-graph.show_graph_on_occupncy_grid()
+graph.run()
+graph.show_nodes_on_occupancy_grid()
+graph.show_nodes_and_edges_with_obs_on_occupancy_grid()
+graph.show_nodes_and_all_traversable_edges()
 # print(graph.graph['x0y0'])
 
 
