@@ -42,13 +42,16 @@ class Mapper(object):
 
         if agent_no == 0:
             color_b,color_g,color_r = 255,0,0
+            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),2,(color_b,color_g,color_r))
         elif agent_no == 1:
             color_b,color_g,color_r = 0,255,0
+            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),3,(color_b,color_g,color_r))
         else:
             color_b,color_g,color_r = 0,0,255
+            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),4,(color_b,color_g,color_r))
 
         self._mapped_grid[start_y: end_y, start_x: end_x] = self._global_grid[start_y: end_y, start_x: end_x]
-        cv2.ellipse(self._mapped_grid,(agent_pos['x'], agent_pos['y']),(10,10),0,15,345,(color_b,color_g,color_r),-1)
+        # cv2.ellipse(self._mapped_grid,(agent_pos['x'], agent_pos['y']),(10,10),0,15,345,(color_b,color_g,color_r),-1)
     
     
     def show_mapped_grid(self):

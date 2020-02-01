@@ -38,9 +38,12 @@ class HungarianRegionAssignment(object):
         return self._cost_matrix[self._row_ind, self._col_ind].sum()
 
     
-    def show_assigned_regions(self, agenthandler, region_centroids):
+    def show_assigned_regions(self, agenthandler, region_centroids, grid=None):
 
-        temp_grid = copy.copy(self._grid)
+        if grid is not None:
+            temp_grid = copy.copy(grid)
+        else:
+            temp_grid = copy.copy(self._grid)
         font = cv2.FONT_HERSHEY_SIMPLEX
         
         for i in range(Config.NO_OF_AGENTS):

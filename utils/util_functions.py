@@ -57,9 +57,15 @@ def stateNameToCoords(name, edge_cost):
     val_1 = int(name.split('x')[1].split('y')[0])*edge_cost
     val_2 = int(name.split('x')[1].split('y')[1])*edge_cost
 
-    if val_1 == 0:
-      val_1 = edge_cost
-    if val_2 == 0:
-      val_2 = edge_cost
+    val_1 += edge_cost
+    val_2 += edge_cost
 
     return [val_1, val_2]
+
+
+def stateCoordsToName(Coordx, Coordy, edge_cost):
+
+    val_1 = int((Coordx-edge_cost)/edge_cost)
+    val_2 = int((Coordy-edge_cost)/edge_cost)
+
+    return "x"+str(val_1)+"y"+str(val_2)

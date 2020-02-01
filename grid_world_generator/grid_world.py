@@ -5,7 +5,9 @@ from cv2 import cv2
 from utils.graph import Node, Graph
 from utils.util_functions import stateNameToCoords
 
+
 class GridWorld(Graph):
+    
     def __init__(self, x_dim, y_dim, edge_cost, grid):
         
         self._grid = grid
@@ -29,11 +31,14 @@ class GridWorld(Graph):
         temp_grid = copy.copy(self._grid_with_nodes)
         
         for el in self.graph:
+#             print(el, self.graph[str(el)].children)
             for child in self.graph[str(el)].children:
                 temp_coord_1 = stateNameToCoords(self.graph[str(el)].id, self._edge_cost)
                 temp_coord_2 = stateNameToCoords(child, self._edge_cost)
-                temp_grid = cv2.line(temp_grid, (temp_coord_1[0],temp_coord_1[1]),\
-                         (temp_coord_2[0],temp_coord_2[1]), [255,0,0], 2)
+#                 print("\t", el, child, (temp_coord_1[1],temp_coord_1[0]), \
+#                      (temp_coord_2[1],temp_coord_2[0]))
+                temp_grid = cv2.line(temp_grid, (temp_coord_1[1],temp_coord_1[0]),\
+                         (temp_coord_2[1],temp_coord_2[0]), [255,0,0], 2)
                 
         self._grid_with_nodes_and_all_traversable_edges = temp_grid
 
@@ -41,29 +46,31 @@ class GridWorld(Graph):
     def _generate_graph(self):
         
         temp_grid = copy.copy(self._grid_with_nodes)
-        
-        for i in range(self._y_dim+1):
-            for j in range(self._x_dim+1):
-                node = Node('x'+str(j)+'y'+str(i))
-                current_node_name = 'x'+str(j)+'y'+str(i)
-                if j>0: # not top row
-                    node_under_tesing_name = 'x'+str(j-1)+'y'+str(i)
+
+        for i in range(len(self._cells)):
+            row = self._cells[i]
+            for j in range(len(row)):
+                
+                node = Node('x'+str(i)+'y'+str(j))
+                current_node_name = 'x'+str(i)+'y'+str(j)
+                if i>0: # not top row
+                    node_under_tesing_name = 'x'+str(i-1)+'y'+str(j)
                     node, temp_grid = self._decide_if_connection_or_not(\
                                             current_node_name, node_under_tesing_name, node, temp_grid)
-                if j+1 < self._y_dim: # not bottom row
-                    node_under_tesing_name = 'x'+str(j+1)+'y'+str(i)
+                if i+1 < self._y_dim: # not bottom row
+                    node_under_tesing_name = 'x'+str(i+1)+'y'+str(j)
                     node, temp_grid = self._decide_if_connection_or_not(\
                                             current_node_name, node_under_tesing_name, node, temp_grid)
-                if i>0: # not left most col
-                    node_under_tesing_name = 'x'+str(j)+'y'+str(i-1)
+                if j>0: # not left most col
+                    node_under_tesing_name = 'x'+str(i)+'y'+str(j-1)
                     node, temp_grid = self._decide_if_connection_or_not(\
                                             current_node_name, node_under_tesing_name, node, temp_grid)
-                if i+1 < self._x_dim: # not right most
-                    node_under_tesing_name = 'x'+str(j)+'y'+str(i+1)
+                if j+1 < self._x_dim: # not right most
+                    node_under_tesing_name = 'x'+str(i)+'y'+str(j+1)
                     node, temp_grid = self._decide_if_connection_or_not(\
                                             current_node_name, node_under_tesing_name, node, temp_grid)
                 
-                self.graph['x'+str(j)+'y'+str(i)] = node
+                self.graph['x'+str(i)+'y'+str(j)] = node
                 
         self._grid_with_nodes_and_edges_with_obs = temp_grid
     
@@ -76,8 +83,9 @@ class GridWorld(Graph):
         else:
             temp_coord_1 = stateNameToCoords(current_node_name, self._edge_cost)
             temp_coord_2 = stateNameToCoords(node_under_tesing_name, self._edge_cost)
-            temp_grid = cv2.line(temp_grid, (temp_coord_1[0],temp_coord_1[1]),\
-                         (temp_coord_2[0],temp_coord_2[1]), [255,0,0], 2)
+#             print("temp_coord_1:", temp_coord_1, ", temp_coord_2:", temp_coord_2)
+            temp_grid = cv2.line(temp_grid, (temp_coord_1[1],temp_coord_1[0]),\
+                         (temp_coord_2[1],temp_coord_2[0]), [0,0,255], 2)
 
         return node, temp_grid
                 
@@ -101,27 +109,29 @@ class GridWorld(Graph):
     
     def _check_if_no_obs_bw_nodes(self, node_1, node_2):
         
+#         print(node_1, node_2)
+        
         temp_coord_1 = stateNameToCoords(node_1, self._edge_cost)
         temp_coord_2 = stateNameToCoords(node_2, self._edge_cost)
         
-        if temp_coord_1[0] == temp_coord_2[0]:
-            width_min = temp_coord_1[0] - 2
-            width_max = temp_coord_2[0] + 2
-            temp_width_pxls = temp_coord_1[0]*np.ones(shape=[1, self._edge_cost], dtype=np.int)
-        else:
-            width_min = min(temp_coord_1[0], temp_coord_2[0])
-            width_max = max(temp_coord_1[0], temp_coord_2[0])
-            temp_width_pxls = np.array(range(min(temp_coord_1[0], temp_coord_2[0]), \
-                                             max(temp_coord_1[0], temp_coord_2[0]),1))
         if temp_coord_1[1] == temp_coord_2[1]:
-            len_min = temp_coord_1[1] - 2
-            len_max = temp_coord_2[1] + 2
-            temp_len_pxls = temp_coord_1[1]*np.ones(shape=[1, self._edge_cost], dtype=np.int)
+            width_min = temp_coord_1[1] - 5
+            width_max = temp_coord_2[1] + 5
+            temp_width_pxls = temp_coord_1[1]*np.ones(shape=[1, self._edge_cost], dtype=np.int)
         else:
-            len_min = min(temp_coord_1[1], temp_coord_2[1])
-            len_max = max(temp_coord_1[1], temp_coord_2[1])
-            temp_len_pxls = np.array(range(min(temp_coord_1[1], temp_coord_2[1]), \
-                                           max(temp_coord_1[1], temp_coord_2[1]),1))
+            width_min = min(temp_coord_1[1], temp_coord_2[1])
+            width_max = max(temp_coord_1[1], temp_coord_2[1])
+            temp_width_pxls = np.array(range(min(temp_coord_1[1], temp_coord_2[1]), \
+                                             max(temp_coord_1[1], temp_coord_2[1]),1))
+        if temp_coord_1[0] == temp_coord_2[0]:
+            len_min = temp_coord_1[0] - 5
+            len_max = temp_coord_2[0] + 5
+            temp_len_pxls = temp_coord_1[0]*np.ones(shape=[1, self._edge_cost], dtype=np.int)
+        else:
+            len_min = min(temp_coord_1[0], temp_coord_2[0])
+            len_max = max(temp_coord_1[0], temp_coord_2[0])
+            temp_len_pxls = np.array(range(min(temp_coord_1[0], temp_coord_2[0]), \
+                                           max(temp_coord_1[0], temp_coord_2[0]),1))
 
         temp_grid = copy.copy(self._grid)
         
@@ -141,7 +151,7 @@ class GridWorld(Graph):
         cv2.imshow('Occupancy_grid_with_nodes', self._grid_with_nodes)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        
+                
         
     def show_nodes_and_edges_with_obs_on_occupancy_grid(self):
         
@@ -155,6 +165,26 @@ class GridWorld(Graph):
         cv2.imshow('Occupancy_grid_with_nodes_and_all_traversable_edges', self._grid_with_nodes_and_all_traversable_edges)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+        
+    
+    def get_occupancy_grid_with_nodes(self):
+        
+        return self._grid_with_nodes
+    
+    
+    def get_occupancy_grid_with_nodes_and_edges_with_obs(self):
+        
+        return self._grid_with_nodes_and_edges_with_obs
+        
+    
+    def get_occupancy_grid_with_nodes_and_all_traversable_edges(self):
+        
+        return self._grid_with_nodes_and_all_traversable_edges
+
+    
+    def get_graph(self):
+
+        return self.graph
         
     
     def run(self):

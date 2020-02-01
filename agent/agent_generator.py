@@ -6,15 +6,18 @@ from cv2 import cv2
 from config.Config import Config
 
 from utils.util_functions import l2_distance
+from utils.graph import get_closest_vertex_coords_on_graph_from_pos
 
 class AgentGenerator(object):
 
-    def __init__(self):
+    def __init__(self, graph):
 
         self._grid_len = Config.GRID_LEN
         self._grid_width = Config.GRID_WIDTH
         self._free_space = Config.FREE_SPACE
+        self._edge_cost = Config.EDGE_COST
         self._agent_pos = {'x':None, 'y':None}
+        self._graph = graph
 
     
     def generate_agent(self):
@@ -30,8 +33,7 @@ class AgentGenerator(object):
             else:
                 random_y = np.random.randint(self._grid_len - self._free_space + 20, self._grid_len - 20)
 
-        self._agent_pos['x'] = random_x
-        self._agent_pos['y'] = random_y
+        self._agent_pos['x'], self._agent_pos['y'] = get_closest_vertex_coords_on_graph_from_pos(self._graph, random_x, random_y, self._edge_cost)
 
 
     def get_agent_pos(self):
@@ -61,3 +63,9 @@ class AgentGenerator(object):
 
             self._agent_pos['x'] = self._agent_pos['x'] + x_to_add
             self._agent_pos['y'] = self._agent_pos['y'] + y_to_add
+
+    
+    def set_pos_of_agent(self, new_x, new_y):
+
+        self._agent_pos['x'] = new_x
+        self._agent_pos['y'] = new_y

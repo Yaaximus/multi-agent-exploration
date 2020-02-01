@@ -18,6 +18,7 @@ default_config = {
     'grid_len': 612,
     'grid_width': 1024,
     'free_space': 100,
+    'edge_cost': 40,
     'complexity_level': 'difficult'
 }
 

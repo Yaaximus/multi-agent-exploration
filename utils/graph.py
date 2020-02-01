@@ -1,3 +1,6 @@
+import math
+from utils.util_functions import stateNameToCoords, l2_distance
+
 class Node:
     def __init__(self, id):
         self.id = id
@@ -98,3 +101,21 @@ def makeGraph():
     # g.graph = graph
     # print(g)
     return g
+
+
+def get_closest_vertex_coords_on_graph_from_pos(graph, pos_x, pos_y, edge_cost):
+
+    temp_x = pos_x
+    temp_y = pos_y
+    temp_dist = math.inf
+
+    for el in graph:
+        temp_coods = stateNameToCoords(el, edge_cost)
+        new_temp_dist = l2_distance(temp_x, temp_y, temp_coods[1], temp_coods[0])
+        if new_temp_dist < temp_dist:
+            # print("Found a better coord", temp_coods)
+            x = temp_coods[1]
+            y = temp_coods[0]
+            temp_dist = new_temp_dist
+        
+    return x, y
