@@ -47,11 +47,12 @@ for i in range(Config.NO_OF_AGENTS):
     graph_list[-1].run()
     #     temp_graph = copy.copy(graph.get_graph())
 #     graph_list[-1].show_nodes_on_occupancy_grid()
-# graph.show_nodes_and_edges_with_obs_on_occupancy_grid()
-# graph.show_nodes_and_all_traversable_edges()
-# temp_grid_with_nodes = graph_list[-1].get_occupancy_grid_with_nodes()
-# temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
-# temp_grid_with_nodes_and_all_traversable_edges = graph_list[-1].get_occupancy_grid_with_nodes_and_all_traversable_edges()
+graph_list[-1].show_nodes_on_occupancy_grid()
+graph_list[-1].show_nodes_and_edges_with_obs_on_occupancy_grid()
+graph_list[-1].show_nodes_and_all_traversable_edges()
+temp_grid_with_nodes = graph_list[-1].get_occupancy_grid_with_nodes()
+temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
+temp_grid_with_nodes_and_all_traversable_edges = graph_list[-1].get_occupancy_grid_with_nodes_and_all_traversable_edges()
 # print(graph.graph['x0y0'])
 temp_graph_list = copy.copy(graph_list)
 
@@ -105,7 +106,7 @@ for el in temp_regions_cols:
     ind += 1
 
 hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids)
-# hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids, temp_grid_with_nodes)
+hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids, temp_grid_with_nodes)
 
 print("Region centroids:\n")
 ind = 1
@@ -130,7 +131,8 @@ print("\nTotal cost:", hungaian_region_assignment.get_total_cost())
 
 # ################################################################################################
 
-grid_mapper = Mapper(global_grid=temp_occupancy_grid_without_obs)
+# grid_mapper = Mapper(global_grid=temp_occupancy_grid_without_obs)
+grid_mapper = Mapper(global_grid=temp_occupancy_grid_with_obs)
 
 display = copy.copy(temp_occupancy_grid_without_obs)
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -170,9 +172,12 @@ for i in range(len(s_current_names)):
     print(s_current_names[i], pos_coords)
 
 print("")
-while s_new_names[0] != s_goal_names[0] or s_new_names[1] != s_goal_names[1] or s_new_names[2] != s_goal_names[2]:
+
+mission_complete = False
+
+while not mission_complete:
     
-    display = copy.copy(temp_occupancy_grid_without_obs)
+    display = copy.copy(temp_occupancy_grid_with_obs)
     
     for i in range(Config.NO_OF_AGENTS):
 
@@ -190,7 +195,7 @@ while s_new_names[0] != s_goal_names[0] or s_new_names[1] != s_goal_names[1] or 
 
         img = cv2.ellipse(display,(temp_pos_x,temp_pos_y),(10,10),0,15,345,(color_b,color_g,color_r),-1)
         
-        grid_mapper.map_grid(agent_no=i, agent_pos=temp_pos)
+        graph_list[i] = grid_mapper.map_grid(agent_no=i, agent_pos=temp_pos, graph=graph_list[i])
 
     temp_img = cv2.resize(img, (512, 512))
 
@@ -204,9 +209,20 @@ while s_new_names[0] != s_goal_names[0] or s_new_names[1] != s_goal_names[1] or 
     k = cv2.waitKey(1) & 0xFF
     
     if k == ord('q'):
+        print("Mission Failed!")
         break
 
     time.sleep(0.5)
+    
+    count = 0
+    for el in goal_reached_status_list:
+        if el is True:
+            count += 1
+        if count == Config.NO_OF_AGENTS:
+            mission_complete = True
+            print("Mission Complete.", "\n")
+            for el in s_new_names:
+                print(el)
     
     for i in range(len(graph_list)):
         
@@ -224,6 +240,7 @@ while s_new_names[0] != s_goal_names[0] or s_new_names[1] != s_goal_names[1] or 
 #             print("\t\t\t\t", i, s_new_names[i], k_m_list[i])
         
         temp_coord = stateNameToCoords(s_current_names[i], Config.EDGE_COST)
+#         print("New Coord:", temp_coord[1], temp_coord[0])
         agenthandler.set_pos_of_agent(i, temp_coord[1], temp_coord[0])
             
         if s_current_names[i] == s_goal_names[i]:

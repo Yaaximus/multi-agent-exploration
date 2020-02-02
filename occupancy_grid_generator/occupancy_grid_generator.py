@@ -74,7 +74,9 @@ class OccupancyGridGenerator(object):
             random_x = np.random.randint(200, self._grid_width-200)
             random_y = np.random.randint(200, self._grid_len-200)
 
-            pts = np.array([[random_x, random_y],[random_x+30, random_y],[random_x+30, random_y-30],[random_x, random_y-30]], np.int32)
+            # random_x = 170
+            # random_y = 350
+            pts = np.array([[random_x, random_y],[random_x+40, random_y],[random_x+40, random_y-40],[random_x, random_y-40]], np.int32)
             
             cv2.fillPoly(temp_grid, [pts], 0)
 

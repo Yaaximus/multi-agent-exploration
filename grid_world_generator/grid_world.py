@@ -15,25 +15,35 @@ class GridWorld(Graph):
         self._y_dim = y_dim
         self._edge_cost = edge_cost
         
-        self._cells = [0] * self._y_dim
+        self.cells = [0] * self._y_dim
         
         for i in range(self._y_dim):
-            self._cells[i] = [0] * self._x_dim
+            self.cells[i] = [0] * self._x_dim
             
         self.graph = {}
         self._grid_with_nodes = None
         self._grid_with_nodes_and_edges = None
         self._grid_with_nodes_and_edges_with_obs = None
+
+    def plot_graph_status(self, graph):
+        
+        self._draw_all_traversable_edges_on_grid(graph)
+        self.show_nodes_and_all_traversable_edges()
         
     
-    def _draw_all_traversable_edges_on_grid(self):
+    def _draw_all_traversable_edges_on_grid(self, graph=None):
         
         temp_grid = copy.copy(self._grid_with_nodes)
+        if graph is None:
+            temp_graph = self.graph
+        else:
+            temp_graph = graph
+	
         
-        for el in self.graph:
-#             print(el, self.graph[str(el)].children)
-            for child in self.graph[str(el)].children:
-                temp_coord_1 = stateNameToCoords(self.graph[str(el)].id, self._edge_cost)
+        for el in temp_graph:
+#             print(el, temp_graph[str(el)].children)
+            for child in temp_graph[str(el)].children:
+                temp_coord_1 = stateNameToCoords(temp_graph[str(el)].id, self._edge_cost)
                 temp_coord_2 = stateNameToCoords(child, self._edge_cost)
 #                 print("\t", el, child, (temp_coord_1[1],temp_coord_1[0]), \
 #                      (temp_coord_2[1],temp_coord_2[0]))
@@ -47,8 +57,8 @@ class GridWorld(Graph):
         
         temp_grid = copy.copy(self._grid_with_nodes)
 
-        for i in range(len(self._cells)):
-            row = self._cells[i]
+        for i in range(len(self.cells)):
+            row = self.cells[i]
             for j in range(len(row)):
                 
                 node = Node('x'+str(i)+'y'+str(j))

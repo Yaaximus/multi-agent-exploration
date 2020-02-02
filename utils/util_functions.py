@@ -69,3 +69,10 @@ def stateCoordsToName(Coordx, Coordy, edge_cost):
     val_2 = int((Coordy-edge_cost)/edge_cost)
 
     return "x"+str(val_1)+"y"+str(val_2)
+
+def getRowColumnFromName(name):
+
+    val_1 = int(name.split('x')[1].split('y')[0])
+    val_2 = int(name.split('x')[1].split('y')[1])
+
+    return [val_1, val_2]

@@ -1,7 +1,7 @@
 import heapq
 
 from config.Config import Config
-from utils.util_functions import stateNameToCoords
+from utils.util_functions import stateNameToCoords, getRowColumnFromName
 
 
 def topKey(queue):
@@ -25,6 +25,7 @@ def calculateKey(graph, id, s_current, k_m):
 
 
 def updateVertex(graph, queue, id, s_current, k_m):
+#     print("Going to update vertex...")
     s_goal = graph.goal
     if id != s_goal:
         min_rhs = float('inf')
@@ -39,7 +40,7 @@ def updateVertex(graph, queue, id, s_current, k_m):
         queue.remove(id_in_queue[0])
     if graph.graph[id].rhs != graph.graph[id].g:
         heapq.heappush(queue, calculateKey(graph, id, s_current, k_m) + (id,))
-
+#     print("Updated.")
 
 def computeShortestPath(graph, queue, s_start, k_m):
     while (graph.graph[s_start].rhs != graph.graph[s_start].g) or (topKey(queue) < calculateKey(graph, s_start, s_start, k_m)):
@@ -69,6 +70,7 @@ def nextInShortestPath(graph, s_current):
     s_next = None
     if graph.graph[s_current].rhs == float('inf'):
         print('You are done stuck')
+#         graph.plot_graph_status(graph.graph)
     else:
         for i in graph.graph[s_current].children:
             # print(i)
@@ -87,42 +89,53 @@ def scanForObstacles(graph, queue, s_current, scan_range, k_m):
     states_to_update = {}
     range_checked = 0
     if scan_range >= 1:
+#         print("Scan Range:", scan_range)
         for neighbor in graph.graph[s_current].children:
-            neighbor_coords = stateNameToCoords(neighbor, Config.EDGE_COST)
-            states_to_update[neighbor] = graph._cells[neighbor_coords[1]
-                                                     ][neighbor_coords[0]]
-        range_checked = 1
-    # print(states_to_update)
-
+#             neighbor_coords = stateNameToCoords(neighbor, Config.EDGE_COST)
+            temp_row, temp_col = getRowColumnFromName(neighbor)
+#             print("SCAN FOR OBS: Temp_row:", temp_row, "Temp_col:", temp_col)
+            states_to_update[neighbor] = graph.cells[temp_row][temp_col]
+        range_checked = Config.EDGE_COST
+    # print("States to Update:", states_to_update)
     while range_checked < scan_range:
+#         print("Range Checked", range_checked)
+#         print("----------------------Range Checked<Scan Range-----------------------")
         new_set = {}
         for state in states_to_update:
             new_set[state] = states_to_update[state]
             for neighbor in graph.graph[state].children:
                 if neighbor not in new_set:
-                    neighbor_coords = stateNameToCoords(neighbor, Config.EDGE_COST)
-                    new_set[neighbor] = graph._cells[neighbor_coords[1]
-                                                    ][neighbor_coords[0]]
-        range_checked += 1
+#                     neighbor_coords = stateNameToCoords(neighbor, Config.EDGE_COST)
+                    temp_row, temp_col = getRowColumnFromName(neighbor)
+#                     print("SCAN FOR OBS: Temp_row:", temp_row, "Temp_col:", temp_col)
+                    new_set[neighbor] = graph.cells[temp_row][temp_col]
+        # print("New Sets:", new_set)
+#         print("Range Checked", range_checked)
+        range_checked += Config.EDGE_COST
         states_to_update = new_set
 
     new_obstacle = False
     for state in states_to_update:
-        if states_to_update[state] < 0:  # found cell with obstacle
-            # print('found obstacle in ', state)
+        if states_to_update[state] == -1:  # found cell with obstacle
+#             print('found obstacle in ', state)
             for neighbor in graph.graph[state].children:
                 # first time to observe this obstacle where one wasn't before
                 if(graph.graph[state].children[neighbor] != float('inf')):
-                    neighbor_coords = stateNameToCoords(state, Config.EDGE_COST)
-                    graph._cells[neighbor_coords[1]][neighbor_coords[0]] = -2
+#                     neighbor_coords = stateNameToCoords(state, Config.EDGE_COST)
+                    temp_row, temp_col = getRowColumnFromName(neighbor)
+                    graph.cells[temp_row][temp_col] = -2
                     graph.graph[neighbor].children[state] = float('inf')
                     graph.graph[state].children[neighbor] = float('inf')
                     updateVertex(graph, queue, state, s_current, k_m)
                     new_obstacle = True
-        # elif states_to_update[state] == 0: #cell without obstacle
-            # for neighbor in graph.graph[state].children:
-                # if(graph.graph[state].children[neighbor] != float('inf')):
-
+#         elif states_to_update[state] == 0: #cell without obstacle
+#             for neighbor in graph.graph[state].children:
+#                 if(graph.graph[state].children[neighbor] != float('inf')):
+#                     temp_row, temp_col = getRowColumnFromName(neighbor)
+#                     graph.cells[temp_row][temp_col] = 0
+#                     graph.graph[neighbor].children[state] = float('inf')
+#                     graph.graph[state].children[neighbor] = float('inf')
+#                     updateVertex(graph, queue, state, s_current, k_m)
     # print(graph)
     return new_obstacle
 
@@ -133,12 +146,14 @@ def moveAndRescan(graph, queue, s_current, scan_range, k_m):
     else:
         s_last = s_current
         s_new = nextInShortestPath(graph, s_current)
-        new_coords = stateNameToCoords(s_new, Config.EDGE_COST)
+#         print("S_new", s_new)
+#         new_coords = stateNameToCoords(s_new, Config.EDGE_COST)
+        temp_row, temp_col = getRowColumnFromName(s_new)
+#         print("MOVE AND RESCAN: Temp_row:", temp_row, "Temp_col:", temp_col)
+        if(graph.cells[temp_row][temp_col] == -1):  # just ran into new obstacle
+            s_new = s_current  # need to hold tight and scan/replan first
 
-#         if(graph._cells[new_coords[1]][new_coords[0]] == -1):  # just ran into new obstacle
-#             s_new = s_current  # need to hold tight and scan/replan first
-
-#         results = scanForObstacles(graph, queue, s_new, scan_range, k_m)
+        results = scanForObstacles(graph, queue, s_new, scan_range, k_m)
         # print(graph)
         k_m += heuristic_from_s(graph, s_last, s_new)
         computeShortestPath(graph, queue, s_current, k_m)
@@ -153,4 +168,3 @@ def initDStarLite(graph, queue, s_start, s_goal, k_m):
     computeShortestPath(graph, queue, s_start, k_m)
 
     return (graph, queue, k_m)
-
