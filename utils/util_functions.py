@@ -1,6 +1,5 @@
 #!usr/bin/env python
 
-# import copy
 import math
 
 import numpy as np
@@ -69,6 +68,7 @@ def stateCoordsToName(Coordx, Coordy, edge_cost):
     val_2 = int((Coordy-edge_cost)/edge_cost)
 
     return "x"+str(val_1)+"y"+str(val_2)
+
 
 def getRowColumnFromName(name):
 

@@ -2,18 +2,19 @@ import copy
 
 import numpy as np
 from cv2 import cv2
+from config.Config import Config
 from utils.graph import Node, Graph
 from utils.util_functions import stateNameToCoords
 
 
 class GridWorld(Graph):
     
-    def __init__(self, x_dim, y_dim, edge_cost, grid):
+    def __init__(self, x_dim, y_dim, grid):
         
         self._grid = grid
         self._x_dim = x_dim
         self._y_dim = y_dim
-        self._edge_cost = edge_cost
+        self._edge_cost = Config.EDGE_COST
         
         self.cells = [0] * self._y_dim
         

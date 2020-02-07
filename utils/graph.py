@@ -64,43 +64,43 @@ def addNodeToGraph(graph, id, neighbors, edge=1):
     return graph
 
 
-def makeGraph():
-    graph = {}
+# def makeGraph():
+#     graph = {}
 
-    # 8-connected graph (w diagonals)
-    # Impossible to find path - 2 obstacles in middle
-    # graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(
-    #     graph, 'x2y1', ['x1y1', 'x1y2', 'x3y1', 'x2y2', 'x3y2'], float('inf'))
-    # graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(
-    #     graph, 'x2y2', ['x1y1', 'x1y2', 'x3y1', 'x2y1', 'x3y2'], float('inf'))
-    # graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y1', 'x2y2'])
+#     # 8-connected graph (w diagonals)
+#     # Impossible to find path - 2 obstacles in middle
+#     # graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(
+#     #     graph, 'x2y1', ['x1y1', 'x1y2', 'x3y1', 'x2y2', 'x3y2'], float('inf'))
+#     # graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(
+#     #     graph, 'x2y2', ['x1y1', 'x1y2', 'x3y1', 'x2y1', 'x3y2'], float('inf'))
+#     # graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y1', 'x2y2'])
 
-    # 8-connected graph (w diagonals)
-    # Impossible to find path - 2 obstacles in middle
-    # graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(
-    #     graph, 'x2y1', ['x1y1', 'x1y2', 'x3y1', 'x2y2', 'x3y2'], float('inf'))
-    # graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(
-    #     graph, 'x2y2', ['x1y1', 'x1y2', 'x3y1', 'x2y1', 'x3y2'])
-    # graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1', 'x2y2'])
-    # graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y1', 'x2y2'])
+#     # 8-connected graph (w diagonals)
+#     # Impossible to find path - 2 obstacles in middle
+#     # graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(
+#     #     graph, 'x2y1', ['x1y1', 'x1y2', 'x3y1', 'x2y2', 'x3y2'], float('inf'))
+#     # graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(
+#     #     graph, 'x2y2', ['x1y1', 'x1y2', 'x3y1', 'x2y1', 'x3y2'])
+#     # graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1', 'x2y2'])
+#     # graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y1', 'x2y2'])
 
-    # 4-connected graph (w/out diagonals)
-    graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1'])
-    graph = addNodeToGraph(graph, 'x2y1', ['x1y1', 'x3y1', 'x2y2'])
-    graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y2'])
-    graph = addNodeToGraph(graph, 'x2y2', ['x1y2', 'x2y1', 'x3y2'])
-    graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1'])
-    graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y2'])
+#     # 4-connected graph (w/out diagonals)
+#     graph = addNodeToGraph(graph, 'x1y1', ['x1y2', 'x2y1'])
+#     graph = addNodeToGraph(graph, 'x2y1', ['x1y1', 'x3y1', 'x2y2'])
+#     graph = addNodeToGraph(graph, 'x1y2', ['x1y1', 'x2y2'])
+#     graph = addNodeToGraph(graph, 'x2y2', ['x1y2', 'x2y1', 'x3y2'])
+#     graph = addNodeToGraph(graph, 'x3y1', ['x3y2', 'x2y1'])
+#     graph = addNodeToGraph(graph, 'x3y2', ['x3y1', 'x2y2'])
 
-    g = GridWorld(X_DIM, Y_DIM)
-    # g.graph = graph
-    # print(g)
-    return g
+#     g = GridWorld(X_DIM, Y_DIM)
+#     # g.graph = graph
+#     # print(g)
+#     return g
 
 
 def get_closest_vertex_coords_on_graph_from_pos(graph, pos_x, pos_y, edge_cost):
@@ -110,12 +110,12 @@ def get_closest_vertex_coords_on_graph_from_pos(graph, pos_x, pos_y, edge_cost):
     temp_dist = math.inf
 
     for el in graph:
-        temp_coods = stateNameToCoords(el, edge_cost)
-        new_temp_dist = l2_distance(temp_x, temp_y, temp_coods[1], temp_coods[0])
+        temp_coords = stateNameToCoords(el, edge_cost)
+        new_temp_dist = l2_distance(temp_x, temp_y, temp_coords[1], temp_coords[0])
         if new_temp_dist < temp_dist:
-            # print("Found a better coord", temp_coods)
-            x = temp_coods[1]
-            y = temp_coods[0]
+            # print("Found a better coord", temp_coords)
+            x = temp_coords[1]
+            y = temp_coords[0]
             temp_dist = new_temp_dist
         
     return x, y
