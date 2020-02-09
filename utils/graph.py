@@ -1,4 +1,7 @@
 import math
+import copy
+import numpy as np
+from config.Config import Config
 from utils.util_functions import stateNameToCoords, l2_distance
 
 class Node:
@@ -119,3 +122,36 @@ def get_closest_vertex_coords_on_graph_from_pos(graph, pos_x, pos_y, edge_cost):
             temp_dist = new_temp_dist
         
     return x, y
+
+
+def check_if_no_obs_bw_nodes(node_1, node_2, grid):
+        
+    # print(node_1, node_2)
+    temp_coord_1 = stateNameToCoords(node_1, Config.EDGE_COST)
+    temp_coord_2 = stateNameToCoords(node_2, Config.EDGE_COST)
+
+    if temp_coord_1[1] == temp_coord_2[1]:
+        width_min = temp_coord_1[1] - 5
+        width_max = temp_coord_2[1] + 5
+    else:
+        width_min = min(temp_coord_1[1], temp_coord_2[1])
+        width_max = max(temp_coord_1[1], temp_coord_2[1])
+
+    if temp_coord_1[0] == temp_coord_2[0]:
+        len_min = temp_coord_1[0] - 5
+        len_max = temp_coord_2[0] + 5
+    else:
+        len_min = min(temp_coord_1[0], temp_coord_2[0])
+        len_max = max(temp_coord_1[0], temp_coord_2[0])
+
+    temp_grid = copy.copy(grid)
+
+    roi = copy.copy(temp_grid[len_min:len_max, width_min:width_max])
+    temp_points = np.where(np.all(roi == [0, 0, 0], axis=-1))
+
+    if len(temp_points[0])>0 or len(temp_points[1])>0:
+            # print("Obstacle")
+        return False
+    else:
+            # print("Path Clear")
+        return True

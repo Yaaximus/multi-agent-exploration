@@ -41,6 +41,7 @@ class Mapper(object):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
+        temp_list_of_node_to_remove = []
 
         temp_points = np.where(np.all(roi == [0, 0, 0], axis=-1))
         
@@ -60,17 +61,20 @@ class Mapper(object):
                     # print(graph.cells[temp_row][temp_column])
                     graph.cells[temp_row][temp_column] = -1
                     # print(graph.cells[temp_row][temp_column])
-                    # print("WARNING: Obstacle detected on cell: row:", temp_row, ", col:", temp_column)
+                    # print("Mapper:map_grid:_check_if_new_obs_on_any_node:WARNING: Obstacle detected on cell: row:", temp_row, ", col:", temp_column)
                     # input("Press a key to continue...")
                     # print(graph.cells)
                     # graph.plot_graph_status(graph.graph)
-            return graph
+                    temp_list_of_node_to_remove.append(el)
+            return graph, temp_list_of_node_to_remove
         else:
             # print("Path Clear")
-            return graph
+            return graph, temp_list_of_node_to_remove
 
 
-    def map_grid(self, agent_no, agent_pos, graph):
+    def map_grid(self, agent_no, agent_pos, agent_last_pos, graph):
+
+        # temp_grid = copy.copy(self._mapped_grid)
 
         start_x = agent_pos['x'] - self._sensor_range
         end_x = agent_pos['x'] + self._sensor_range
@@ -79,7 +83,7 @@ class Mapper(object):
         end_y = agent_pos['y'] + self._sensor_range
 	
         # print("Agent:", agent_no)
-        graph = self._check_if_new_obs_on_any_node(graph, start_x, end_x, start_y, end_y)
+        graph, list_of_node_to_remove = self._check_if_new_obs_on_any_node(graph, start_x, end_x, start_y, end_y)
 
         if start_x < 0:
             start_x = 0
@@ -95,23 +99,32 @@ class Mapper(object):
 
         if agent_no == 0:
             color_b,color_g,color_r = 255,0,0
-            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),2,(color_b,color_g,color_r))
+            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),2,(color_b,color_g,color_r))
         elif agent_no == 1:
             color_b,color_g,color_r = 0,255,0
-            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),3,(color_b,color_g,color_r))
+            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),3,(color_b,color_g,color_r))
         else:
             color_b,color_g,color_r = 0,0,255
-            self._global_grid = cv2.circle( self._global_grid,(agent_pos['x'], agent_pos['y']),4,(color_b,color_g,color_r))
+            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),4,(color_b,color_g,color_r))
+
+        try:
+            # print(agent_pos['x'], agent_pos['y'], agent_last_pos['x'], agent_last_pos['y'])
+            self._global_grid = cv2.line(self._global_grid, (agent_pos['x'], agent_pos['y']), \
+                (agent_last_pos['x'], agent_last_pos['y']), (color_b,color_g,color_r), 2)
+        except TypeError:
+            # print(agent_pos['x'], agent_pos['y'], agent_last_pos[1], agent_last_pos[0])
+            self._global_grid = cv2.line(self._global_grid, (agent_pos['x'], agent_pos['y']), \
+                (agent_last_pos[1], agent_last_pos[0]), (color_b,color_g,color_r), 2)
 
         self._mapped_grid[start_y: end_y, start_x: end_x] = self._global_grid[start_y: end_y, start_x: end_x]
         # cv2.ellipse(self._mapped_grid,(agent_pos['x'], agent_pos['y']),(10,10),0,15,345,(color_b,color_g,color_r),-1)
 
-        return graph
+        return graph, list_of_node_to_remove
     
     
     def show_mapped_grid(self):
 
-        cv2.imshow('Occupancy_grid',self._mapped_grid)
+        cv2.imshow('Occupancy_grid', self._mapped_grid)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

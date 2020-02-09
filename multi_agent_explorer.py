@@ -51,8 +51,8 @@ def grid_world(temp_occupancy_grid_without_obs):
         # graph_list[i].show_nodes_and_all_traversable_edges()
 
     temp_grid_with_nodes = graph_list[-1].get_occupancy_grid_with_nodes()
-    temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
-    temp_grid_with_nodes_and_all_traversable_edges = graph_list[-1].get_occupancy_grid_with_nodes_and_all_traversable_edges()
+    # temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
+    # temp_grid_with_nodes_and_all_traversable_edges = graph_list[-1].get_occupancy_grid_with_nodes_and_all_traversable_edges()
     # print(graph.graph['x0y0'])
     temp_graph_list = copy.copy(graph_list)
     
@@ -65,7 +65,7 @@ def k_mean_clustring(temp_occupancy_grid_without_obs):
 
     regions.find_regions()
 
-    temp_regions_xy_points = regions.get_regions_xy_points()
+    # temp_regions_xy_points = regions.get_regions_xy_points()
     temp_region_centroids = regions.get_centroids()
     temp_color_map = regions.get_color_map()
     temp_grid_with_regions = copy.copy(regions.get_grid_with_regions())
@@ -163,8 +163,9 @@ def main():
     
     # ------------------------- Explorer --------------------------- #
     
-    explorer = Explorer(global_grid=temp_occupancy_grid_with_obs, assigned_region_node_names=goal_pos, \
-                       graph_list=temp_graph_list, agenthandler=agenthandler, color_map=color_map_new, \
+    explorer = Explorer(global_grid=temp_occupancy_grid_with_obs, known_grid=temp_occupancy_grid_without_obs, \
+                        assigned_region_node_names=goal_pos, graph_list=temp_graph_list, \
+                        agenthandler=agenthandler, color_map=color_map_new, \
                         grid_with_regions=temp_grid_with_regions, verbose=True)
     explorer.run()
     # -------------------------------------------------------------- #

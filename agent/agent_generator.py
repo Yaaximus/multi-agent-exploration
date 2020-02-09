@@ -41,25 +41,25 @@ class AgentGenerator(object):
         return self._agent_pos
 
     
-    def move_agent(self, x, y):
+    def move_agent(self, x=Config.EDGE_COST, y=Config.EDGE_COST):
 
         temp_x = self._agent_pos['x']
         temp_y = self._agent_pos['y']
 
-        if l2_distance(temp_x, temp_y, temp_x+x, temp_y+y)<10:
+        if l2_distance(temp_x, temp_y, temp_x+x, temp_y+y)<=self._edge_cost:
             self._agent_pos['x'] = self._agent_pos['x'] + x
             self._agent_pos['y'] = self._agent_pos['y'] + y
         else:
             
             if x > 0:
-                x_to_add = 10
+                x_to_add = Config.EDGE_COST
             else:
-                x_to_add = -10
+                x_to_add = -Config.EDGE_COST
 
             if y > 0:
-                y_to_add = 10
+                y_to_add = Config.EDGE_COST
             else:
-                y_to_add = -10
+                y_to_add = -Config.EDGE_COST
 
             self._agent_pos['x'] = self._agent_pos['x'] + x_to_add
             self._agent_pos['y'] = self._agent_pos['y'] + y_to_add
