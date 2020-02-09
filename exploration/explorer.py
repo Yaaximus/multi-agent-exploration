@@ -230,7 +230,7 @@ class Explorer(object):
                 break
 
             # time.sleep(0.5)
-            time.sleep(0.1)
+            time.sleep(0.5)
 
             count = 0
             for el in self._mission_stages_list:
@@ -240,6 +240,9 @@ class Explorer(object):
                     mission_complete = True
                     print("\nAll agents have Explored Assigned Regions.", "\n")
                     print("Agent's Current Node Names: ", self._s_new_names, "\n")
+                    print("-----------------------------------------------------------")
+                    print("--------------------Mission Successful---------------------")
+                    print("-----------------------------------------------------------")
 
             for i in range(len(self._graph_list)):
                 if not self._mission_stages_list[i]['region_reached']:
@@ -310,10 +313,14 @@ class Explorer(object):
 
         print("Shutting Down...", "\n")
         cv2.destroyAllWindows()
-        print("Shutting Down Successfull.\n")
+        print("Shutting Down Successful.\n")
 
 
     def run(self):
+
+        print("-----------------------------------------------------------")
+        print("--------------------REGION-EXPLORATION---------------------")
+        print("-----------------------------------------------------------\n")
         
         self._get_nodes_to_explore()
         self._reach_region_and_explore()

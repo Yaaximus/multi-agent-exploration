@@ -115,7 +115,7 @@ def scanForObstacles(graph, queue, s_current, scan_range, k_m):
         range_checked += Config.EDGE_COST
         states_to_update = new_set
 
-    new_obstacle = False
+    # new_obstacle = False
     for state in states_to_update:
         if states_to_update[state] == -1:  # found cell with obstacle
         # if states_to_update[state] < 0:  # found cell with obstacle
@@ -129,7 +129,7 @@ def scanForObstacles(graph, queue, s_current, scan_range, k_m):
                     graph.graph[neighbor].children[state] = float('inf')
                     graph.graph[state].children[neighbor] = float('inf')
                     updateVertex(graph, queue, state, s_current, k_m)
-                    new_obstacle = True
+                    # new_obstacle = True
     #     elif states_to_update[state] == 0: #cell without obstacle
     #         for neighbor in graph.graph[state].children:
     #             if(graph.graph[state].children[neighbor] != float('inf')):
@@ -139,12 +139,13 @@ def scanForObstacles(graph, queue, s_current, scan_range, k_m):
     #                 graph.graph[state].children[neighbor] = float('inf')
     #                 updateVertex(graph, queue, state, s_current, k_m)
     # print(graph)
-    return new_obstacle
+    # return new_obstacle
 
 
 def runTimeRescanAndMove(graph, queue, s_current, scan_range, k_m, i):
 
-    results = scanForObstacles(graph, queue, s_current, scan_range, k_m)
+    scanForObstacles(graph, queue, s_current, scan_range, k_m)
+    # results = scanForObstacles(graph, queue, s_current, scan_range, k_m)
     # print(graph)
     # k_m += heuristic_from_s(graph, s_last, s_new)
     computeShortestPath(graph, queue, s_current, k_m)
@@ -183,7 +184,8 @@ def moveAndRescan(graph, queue, s_current, scan_range, k_m, i):
         if(graph.cells[temp_row][temp_col] == -1):  # just ran into new obstacle
             s_new = s_current  # need to hold tight and scan/replan first
 
-        results = scanForObstacles(graph, queue, s_new, scan_range, k_m)
+        scanForObstacles(graph, queue, s_new, scan_range, k_m)
+        # results = scanForObstacles(graph, queue, s_new, scan_range, k_m)
         # print(graph)
         k_m += heuristic_from_s(graph, s_last, s_new)
         computeShortestPath(graph, queue, s_current, k_m)

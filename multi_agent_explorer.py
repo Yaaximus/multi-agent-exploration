@@ -18,12 +18,16 @@ from occupancy_grid_generator.occupancy_grid_generator import OccupancyGridGener
 
 
 def occupancy_grid_generator():
+
+    print("-----------------------------------------------------------")
+    print("----------------OCCUPANCY-GRID-GENERATOR-------------------")
+    print("-----------------------------------------------------------\n")
     
     occupancy_grid = OccupancyGridGenerator()
     occupancy_grid.generate_occupancy_grid()
 
-    # occupancy_grid.show_occupancy_grid_without_obs()
-    # occupancy_grid.show_occupancy_grid_with_obs()
+    occupancy_grid.show_occupancy_grid_without_obs()
+    occupancy_grid.show_occupancy_grid_with_obs()
     
     temp_occupancy_grid_without_obs = occupancy_grid.get_occupancy_grid_without_obs()
     temp_occupancy_grid_with_obs = occupancy_grid.get_occupancy_grid_with_obs()
@@ -32,11 +36,15 @@ def occupancy_grid_generator():
 
 
 def grid_world(temp_occupancy_grid_without_obs):
+
+    print("-----------------------------------------------------------")
+    print("-------------------GRID-WORLD-GENERATOR--------------------")
+    print("-----------------------------------------------------------\n")
     
     X_DIM = int(Config.GRID_WIDTH/Config.EDGE_COST)
     Y_DIM = int(Config.GRID_LEN/Config.EDGE_COST)
-    print("Edge Cost:", Config.EDGE_COST, ", Width:", X_DIM, ", Height:", \
-          Y_DIM, ", Sensor Range:", Config.SENSOR_RANGE, "\n")
+    print("Edge Cost:", Config.EDGE_COST, ", Sensor Range:", Config.SENSOR_RANGE, "\n")
+    # print(", Grid Node Width:", X_DIM, ", Grid Node Height:", Y_DIM)
 
     graph_list = []
 
@@ -46,9 +54,9 @@ def grid_world(temp_occupancy_grid_without_obs):
 
         graph_list[i].run()
         # temp_graph = copy.copy(graph.get_graph())
-        # graph_list[i].show_nodes_on_occupancy_grid()
-        # graph_list[i].show_nodes_and_edges_with_obs_on_occupancy_grid()
-        # graph_list[i].show_nodes_and_all_traversable_edges()
+    graph_list[-1].show_nodes_on_occupancy_grid()
+    graph_list[-1].show_nodes_and_edges_with_obs_on_occupancy_grid()
+    graph_list[-1].show_nodes_and_all_traversable_edges()
 
     temp_grid_with_nodes = graph_list[-1].get_occupancy_grid_with_nodes()
     # temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
@@ -61,6 +69,10 @@ def grid_world(temp_occupancy_grid_without_obs):
 
 def k_mean_clustring(temp_occupancy_grid_without_obs):
     
+    print("-----------------------------------------------------------")
+    print("---------------------K-MEAN-CLUSTRING----------------------")
+    print("-----------------------------------------------------------/n")
+
     regions = KMeanClustring(temp_occupancy_grid_without_obs)
 
     regions.find_regions()
@@ -70,8 +82,8 @@ def k_mean_clustring(temp_occupancy_grid_without_obs):
     temp_color_map = regions.get_color_map()
     temp_grid_with_regions = copy.copy(regions.get_grid_with_regions())
     
-    # regions.show_regions_with_centroids()
-    # regions.show_regions()
+    regions.show_regions_with_centroids()
+    regions.show_regions()
 
     # ind = 0
     # for el in temp_regions_xy_points:
@@ -84,6 +96,10 @@ def k_mean_clustring(temp_occupancy_grid_without_obs):
 
 
 def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_regions, temp_graph_list, temp_grid_with_nodes, temp_color_map):
+
+    print("-----------------------------------------------------------")
+    print("---------------HUNGARIAN-REGION ASSIGNMENT-----------------")
+    print("-----------------------------------------------------------/n")
 
     color_map = [[]] * Config.NO_OF_AGENTS
     goal_pos = [''] * Config.NO_OF_AGENTS
@@ -110,8 +126,8 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
         ind += 1
         
     print("\nNew Color Map Order:", color_map, "\n")
-    # hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids)
-    # hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids, temp_grid_with_nodes)
+    hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids)
+    hungaian_region_assignment.show_assigned_regions(agenthandler, temp_region_centroids, temp_grid_with_nodes)
 
     print("Region centroids:\n")
     ind = 1
@@ -138,6 +154,10 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
 
 
 def main():
+
+    print("-----------------------------------------------------------")
+    print("-----------------MULTI-AGENT-EXPLORATION-------------------")
+    print("-----------------------------------------------------------\n")
     
     # ------------------ OCCUPANCY GRID GENERATOR ------------------ #
     
