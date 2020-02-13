@@ -18,6 +18,7 @@ class AgentGenerator(object):
         self._edge_cost = Config.EDGE_COST
         self._agent_pos = {'x':None, 'y':None}
         self._graph = graph
+        self._agent_color = np.random.randint(1, 254, 3).tolist()
 
     
     def generate_agent(self):
@@ -35,6 +36,11 @@ class AgentGenerator(object):
 
         self._agent_pos['x'], self._agent_pos['y'] = get_closest_vertex_coords_on_graph_from_pos(self._graph, random_x, random_y, self._edge_cost)
 
+
+    def get_agent_color(self):
+
+        return self._agent_color
+        
 
     def get_agent_pos(self):
 

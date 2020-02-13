@@ -19,7 +19,9 @@ default_config = {
     'grid_width': 1024,
     'free_space': 100,
     'edge_cost': 40,
-    'complexity_level': 'difficult'
+    'complexity_level': 'difficult',
+    'verbose': True,
+    'show_results': True
 }
 
 

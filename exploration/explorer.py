@@ -17,9 +17,8 @@ from d_star_lite.d_star_lite import initDStarLite, moveAndRescan, runTimeRescanA
 class Explorer(object):
     
     def __init__(self, global_grid, known_grid, assigned_region_node_names, graph_list, \
-                 agenthandler, color_map, grid_with_regions, verbose=False):
+                 agenthandler, color_map, grid_with_regions):
                 
-        self._verbose = verbose
         self._mapped_grid = None
         self._color_map = color_map
         self._img_with_agents = None
@@ -38,8 +37,10 @@ class Explorer(object):
         self._avoiding_obs = [False] * Config.NO_OF_AGENTS
         self._s_current_names = [''] * Config.NO_OF_AGENTS
         self._nodes_to_explore = [[]] * Config.NO_OF_AGENTS
-        self._grid_mapper = Mapper(global_grid=self._global_grid)
+        self._agents_path_flow = [[] for _ in range(Config.NO_OF_AGENTS)]
+        self._grid_mapper = Mapper(global_grid=self._global_grid, agent_handler=self._agent_handler)
         self._assigned_region_node_names = assigned_region_node_names
+        self._agent_color_list = self._agent_handler.get_all_agent_color_list()
         
         temp_coord = [0,0]
         self._mission_stages_list = []
@@ -63,7 +64,7 @@ class Explorer(object):
                                                                             self._assigned_region_node_names[i], \
                                                                             self._k_m_list[i])
 
-        if self._verbose:
+        if Config.VERBOSE:
             print("Explorer: START NODE NAMES:\n")
             print(self._s_start_names, "\n")
             print("Explorer: ASSIGNED REGION NODE NAMES:\n")
@@ -85,6 +86,7 @@ class Explorer(object):
         for i in range(Config.NO_OF_AGENTS):
             
             temp_pos = self._agent_handler.get_pos_of_agent(i)
+            self._agents_path_flow[i].append(stateCoordsToName(temp_pos['x'], temp_pos['y'], Config.EDGE_COST))
             temp_pos_x = temp_pos['x']
             temp_pos_y = temp_pos['y']
             
@@ -100,12 +102,7 @@ class Explorer(object):
     
     def _update_agents_on_map(self, i, temp_pos_x, temp_pos_y):
         
-        if i == 0:
-            color_b,color_g,color_r = 255,0,0
-        elif i == 1:
-            color_b,color_g,color_r = 0,255,0
-        else:
-            color_b,color_g,color_r = 0,0,255
+        color_b,color_g,color_r = self._agent_color_list[i]
 
         self._img_with_agents = cv2.ellipse(self._display,(temp_pos_x,temp_pos_y),\
                                             (10,10),0,15,345,(color_b,color_g,color_r),-1)
@@ -127,7 +124,8 @@ class Explorer(object):
         for i in range(Config.NO_OF_AGENTS):
             
             temp_list = []
-            print("Explorer:_get_nodes_to_explore: Agent {} Color Map:{}".format(i, self._color_map[i]))
+            if Config.VERBOSE:
+                print("Explorer:_get_nodes_to_explore: Agent {} Color Map:{}".format(i, self._color_map[i]))
             for el in self._graph_list[i].graph:
                 temp_coords = stateNameToCoords(el, Config.EDGE_COST)
                 if np.all(self._grid_with_regions[temp_coords[0], temp_coords[1]] == self._color_map[i], axis=-1):
@@ -135,7 +133,7 @@ class Explorer(object):
                     # print(i, el, self._grid_with_regions[temp_coords[0], temp_coords[1]], self._color_map[i])
             self._nodes_to_explore[i] = copy.copy(temp_list)
             # print("Nodes to explore by Agent: {} are {}.".format(i, self._nodes_to_explore[i]))
-        print("")
+        if Config.VERBOSE: print("")
             
             
     def _get_closest_traversable_node(self, i):
@@ -238,11 +236,15 @@ class Explorer(object):
                     count += 1
                 if count == Config.NO_OF_AGENTS:
                     mission_complete = True
-                    print("\nAll agents have Explored Assigned Regions.", "\n")
-                    print("Agent's Current Node Names: ", self._s_new_names, "\n")
-                    print("-----------------------------------------------------------")
-                    print("--------------------Mission Successful---------------------")
-                    print("-----------------------------------------------------------")
+                    cv2.imwrite("Mapped_Grid.png", self._mapped_grid)
+                    cv2.imwrite("Grid_with_regions_explore_with_trajectories.png", h_stacked_images)
+                    if Config.VERBOSE:
+                        print("\nAll agents have Explored Assigned Regions.", "\n")
+                        print("Agent's Current Node Names: ", self._s_new_names, "\n")
+                        print("-----------------------------------------------------------")
+                        print("--------------------Mission Successful---------------------")
+                        print("-----------------------------------------------------------")
+                    break
 
             for i in range(len(self._graph_list)):
                 if not self._mission_stages_list[i]['region_reached']:
@@ -284,16 +286,18 @@ class Explorer(object):
                 if self._s_current_names[i] == self._assigned_region_node_names[i]:
                     if not self._mission_stages_list[i]['region_reached']:
                         self._mission_stages_list[i]['region_reached'] = True
-                        print("Agent: {} has reached assigned region.".format(i))
+                        if Config.VERBOSE:
+                            print("Agent: {} has reached assigned region.".format(i))
                     
                 if len(self._nodes_to_explore[i]) == 0:
                     if not self._mission_stages_list[i]['region_explored']:
                         self._mission_stages_list[i]['region_explored'] = True
-                        print("Agent: {} has explored assigned region.".format(i))
+                        if Config.VERBOSE:
+                            print("Agent: {} has explored assigned region.".format(i))
                         
                 temp_coords = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
                 if np.all(self._global_grid[temp_coords[0], temp_coords[1]] == [0, 0, 0], axis=-1):
-                    print("On An Obstacle :-P Not Possible.........")
+                    if Config.VERBOSE: print("On An Obstacle :-P Not Possible.........")
                     while(1):
                         cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', h_stacked_images)
                         k = cv2.waitKey(1) & 0xFF
@@ -311,19 +315,41 @@ class Explorer(object):
                 k = cv2.waitKey(1) & 0xFF
                 time.sleep(1)
 
-        print("Shutting Down...", "\n")
+        if Config.VERBOSE: print("Shutting Down...", "\n")
         cv2.destroyAllWindows()
-        print("Shutting Down Successful.\n")
+        if Config.VERBOSE: print("Shutting Down Successful.\n")
+
+
+    def _draw_path_of_all_agents_on_separate_grid(self):
+
+        ind = 0
+
+        for el in self._agents_path_flow:
+
+            temp_grid = copy.copy(self._global_grid)
+
+            for i in range(len(el)-1):
+                temp_coord_1 = stateNameToCoords(el[i], Config.EDGE_COST)
+                temp_coord_2 = stateNameToCoords(el[i+1], Config.EDGE_COST)
+
+                temp_grid = cv2.line(temp_grid, (temp_coord_1[0], temp_coord_1[1]), \
+                (temp_coord_2[0], temp_coord_2[1]), (self._agent_color_list[ind]), 2)
+
+            cv2.imwrite("Grid_with_Path_of_Agent_{}_.png".format(ind), temp_grid)
+
+            ind += 1
 
 
     def run(self):
-
-        print("-----------------------------------------------------------")
-        print("--------------------REGION-EXPLORATION---------------------")
-        print("-----------------------------------------------------------\n")
+        
+        if Config.VERBOSE:
+            print("-----------------------------------------------------------")
+            print("--------------------REGION-EXPLORATION---------------------")
+            print("-----------------------------------------------------------\n")
         
         self._get_nodes_to_explore()
         self._reach_region_and_explore()
+        self._draw_path_of_all_agents_on_separate_grid()
 
 
     def _temp_manual_control(self):

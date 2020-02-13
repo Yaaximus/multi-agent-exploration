@@ -10,12 +10,13 @@ from utils.util_functions import stateNameToCoords, getRowColumnFromName
 
 class Mapper(object):
 
-    def __init__(self, global_grid):
+    def __init__(self, global_grid, agent_handler):
 
         self._no_of_agents = Config.NO_OF_AGENTS
         self._grid_len = Config.GRID_LEN
         self._grid_width = Config.GRID_WIDTH
         self._sensor_range = Config.SENSOR_RANGE
+        self._agent_color_list = agent_handler.get_all_agent_color_list()
         self._global_grid = copy.copy(global_grid)
         self._mapped_grid = np.zeros(shape=[self._grid_len, self._grid_width, 3], dtype=np.uint8)
         self._mapped_grid = cv2.copyMakeBorder(self._mapped_grid, 10, 10, 10, 10, cv2.BORDER_CONSTANT)
@@ -96,28 +97,19 @@ class Mapper(object):
 
         if end_y > self._grid_len:
             end_y = self._grid_len
-
-        if agent_no == 0:
-            color_b,color_g,color_r = 255,0,0
-            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),2,(color_b,color_g,color_r))
-        elif agent_no == 1:
-            color_b,color_g,color_r = 0,255,0
-            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),3,(color_b,color_g,color_r))
-        else:
-            color_b,color_g,color_r = 0,0,255
-            self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),4,(color_b,color_g,color_r))
+        self._global_grid = cv2.circle(self._global_grid,(agent_pos['x'], agent_pos['y']),2,(self._agent_color_list[agent_no]))
 
         try:
             # print(agent_pos['x'], agent_pos['y'], agent_last_pos['x'], agent_last_pos['y'])
             self._global_grid = cv2.line(self._global_grid, (agent_pos['x'], agent_pos['y']), \
-                (agent_last_pos['x'], agent_last_pos['y']), (color_b,color_g,color_r), 2)
+                (agent_last_pos['x'], agent_last_pos['y']), (self._agent_color_list[agent_no]), 2)
         except TypeError:
             # print(agent_pos['x'], agent_pos['y'], agent_last_pos[1], agent_last_pos[0])
             self._global_grid = cv2.line(self._global_grid, (agent_pos['x'], agent_pos['y']), \
-                (agent_last_pos[1], agent_last_pos[0]), (color_b,color_g,color_r), 2)
+                (agent_last_pos[1], agent_last_pos[0]), (self._agent_color_list[agent_no]), 2)
 
         self._mapped_grid[start_y: end_y, start_x: end_x] = self._global_grid[start_y: end_y, start_x: end_x]
-        # cv2.ellipse(self._mapped_grid,(agent_pos['x'], agent_pos['y']),(10,10),0,15,345,(color_b,color_g,color_r),-1)
+        # cv2.ellipse(self._mapped_grid,(agent_pos['x'], agent_pos['y']),(10,10),0,15,345,(self._agent_color_list[agent_no]),-1)
 
         return graph, list_of_node_to_remove
     

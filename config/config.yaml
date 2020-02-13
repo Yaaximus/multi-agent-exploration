@@ -1,7 +1,9 @@
 # Configuration for Multi Agent Exploration
 
-no_of_agents: 3
+verbose: False
+show_results: False
+no_of_agents: 8
 sensor_range: 45
 # grid_len: 612
 # grid_width: 612
-complexity_level: 'difficult' # very easy,easy,moderate,difficult
+complexity_level: 'very easy' # very easy,easy,moderate,difficult
