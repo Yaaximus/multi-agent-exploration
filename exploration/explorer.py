@@ -23,34 +23,38 @@ class Explorer(object):
         self._color_map = color_map
         self._img_with_agents = None
         self._graph_list = graph_list
+        self._verbose = Config.VERBOSE
         self._global_grid = global_grid
         self._agent_handler = agenthandler
+        self._edge_cost = Config.EDGE_COST
         self._display = copy.copy(global_grid)
         self._known_grid = copy.copy(known_grid)
-        self._k_m_list = [0] * Config.NO_OF_AGENTS
+        self._no_of_agents = Config.NO_OF_AGENTS
+        self._sensor_range = Config.SENSOR_RANGE
+        self._k_m_list = [0] * self._no_of_agents
         self._grid_with_regions = grid_with_regions
-        self._last_pos = [[]] * Config.NO_OF_AGENTS
-        self._queue_list = [[]] * Config.NO_OF_AGENTS
-        self._s_new_names = [''] * Config.NO_OF_AGENTS
-        self._s_last_names = [''] * Config.NO_OF_AGENTS
-        self._s_start_names = [''] * Config.NO_OF_AGENTS
-        self._avoiding_obs = [False] * Config.NO_OF_AGENTS
-        self._s_current_names = [''] * Config.NO_OF_AGENTS
-        self._nodes_to_explore = [[]] * Config.NO_OF_AGENTS
-        self._agents_path_flow = [[] for _ in range(Config.NO_OF_AGENTS)]
+        self._last_pos = [[]] * self._no_of_agents
+        self._queue_list = [[]] * self._no_of_agents
+        self._s_new_names = [''] * self._no_of_agents
+        self._s_last_names = [''] * self._no_of_agents
+        self._s_start_names = [''] * self._no_of_agents
+        self._avoiding_obs = [False] * self._no_of_agents
+        self._s_current_names = [''] * self._no_of_agents
+        self._nodes_to_explore = [[]] * self._no_of_agents
+        self._agents_path_flow = [[] for _ in range(self._no_of_agents)]
         self._grid_mapper = Mapper(global_grid=self._global_grid, agent_handler=self._agent_handler)
         self._assigned_region_node_names = assigned_region_node_names
         self._agent_color_list = self._agent_handler.get_all_agent_color_list()
         
         temp_coord = [0,0]
         self._mission_stages_list = []
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(self._no_of_agents):
             self._mission_stages_list.append({'region_reached':False, 'region_explored':False})
             
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(self._no_of_agents):
             temp_coord = self._agent_handler.get_pos_of_agent(i)
             self._last_pos[i] = temp_coord
-            self._s_start_names[i] = stateCoordsToName(temp_coord['y'], temp_coord['x'], Config.EDGE_COST)
+            self._s_start_names[i] = stateCoordsToName(temp_coord['y'], temp_coord['x'], self._edge_cost)
             
         self._s_current_names = self._s_start_names
         for i in range(len(self._graph_list)):
@@ -64,7 +68,7 @@ class Explorer(object):
                                                                             self._assigned_region_node_names[i], \
                                                                             self._k_m_list[i])
 
-        if Config.VERBOSE:
+        if self._verbose:
             print("Explorer: START NODE NAMES:\n")
             print(self._s_start_names, "\n")
             print("Explorer: ASSIGNED REGION NODE NAMES:\n")
@@ -72,7 +76,7 @@ class Explorer(object):
             print("Explorer: Number of Graphs in list:", len(self._graph_list), "\n")
 
             for i in range(len(self._s_current_names)):
-                pos_coords = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
+                pos_coords = stateNameToCoords(self._s_current_names[i], self._edge_cost)
 
                 print("Explorer: Node Name: {} , Node Position: {}.".format(self._s_current_names[i], pos_coords))
 
@@ -83,10 +87,10 @@ class Explorer(object):
         
         self._display = copy.copy(self._global_grid)
         
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(self._no_of_agents):
             
             temp_pos = self._agent_handler.get_pos_of_agent(i)
-            self._agents_path_flow[i].append(stateCoordsToName(temp_pos['x'], temp_pos['y'], Config.EDGE_COST))
+            self._agents_path_flow[i].append(stateCoordsToName(temp_pos['x'], temp_pos['y'], self._edge_cost))
             temp_pos_x = temp_pos['x']
             temp_pos_y = temp_pos['y']
             
@@ -121,29 +125,29 @@ class Explorer(object):
     
     def _get_nodes_to_explore(self):
         
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(self._no_of_agents):
             
             temp_list = []
-            if Config.VERBOSE:
+            if self._verbose:
                 print("Explorer:_get_nodes_to_explore: Agent {} Color Map:{}".format(i, self._color_map[i]))
             for el in self._graph_list[i].graph:
-                temp_coords = stateNameToCoords(el, Config.EDGE_COST)
+                temp_coords = stateNameToCoords(el, self._edge_cost)
                 if np.all(self._grid_with_regions[temp_coords[0], temp_coords[1]] == self._color_map[i], axis=-1):
                     temp_list.append(el)
                     # print(i, el, self._grid_with_regions[temp_coords[0], temp_coords[1]], self._color_map[i])
             self._nodes_to_explore[i] = copy.copy(temp_list)
             # print("Nodes to explore by Agent: {} are {}.".format(i, self._nodes_to_explore[i]))
-        if Config.VERBOSE: print("")
+        if self._verbose: print("")
             
             
     def _get_closest_traversable_node(self, i):
         
         temp_dist = math.inf
-        temp_current_coords = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
+        temp_current_coords = stateNameToCoords(self._s_current_names[i], self._edge_cost)
         nodes_to_remove = []
         # print("S Current:", self._s_current_names[i], ", Current Node Coord:", temp_current_coords)
         for el in self._nodes_to_explore[i]:
-            temp_coords = stateNameToCoords(el, Config.EDGE_COST)
+            temp_coords = stateNameToCoords(el, self._edge_cost)
             new_temp_dist = l2_distance(temp_current_coords[0], temp_current_coords[1], temp_coords[0], temp_coords[1])
     
             if np.all(self._global_grid[temp_coords[0], temp_coords[1]] == [255, 255, 255], axis=-1):
@@ -157,8 +161,8 @@ class Explorer(object):
         for el in nodes_to_remove:
             self._nodes_to_explore[i].remove(str(el))
         # print("Closest traversable node x:{}, y:{}, ".format(x, y))
-        # print("Closest traversable Node Name:{}".format(stateCoordsToName(x, y, Config.EDGE_COST)))
-        return stateCoordsToName(x, y, Config.EDGE_COST)
+        # print("Closest traversable Node Name:{}".format(stateCoordsToName(x, y, self._edge_cost)))
+        return stateCoordsToName(x, y, self._edge_cost)
 
 
     def _explore_assigned_region(self, i):
@@ -170,8 +174,8 @@ class Explorer(object):
         else:
             self._avoiding_obs[i] = True
             # print("Explorer:_explore_assigned_region: Obstalce b/w node.")
-            X_DIM = int(Config.GRID_WIDTH/Config.EDGE_COST)
-            Y_DIM = int(Config.GRID_LEN/Config.EDGE_COST)
+            X_DIM = int(Config.GRID_WIDTH/self._edge_cost)
+            Y_DIM = int(Config.GRID_LEN/self._edge_cost)
             temp_graph = GridWorld(X_DIM, Y_DIM, self._known_grid)
             temp_graph.run()
             temp_queue = []
@@ -192,16 +196,16 @@ class Explorer(object):
     
     def _check_max_movement_constraint(self, i):
         
-        temp_current_coords = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
-        temp_new_coords = stateNameToCoords(self._s_new_names[i], Config.EDGE_COST)
+        temp_current_coords = stateNameToCoords(self._s_current_names[i], self._edge_cost)
+        temp_new_coords = stateNameToCoords(self._s_new_names[i], self._edge_cost)
         temp_dist = l2_distance(temp_current_coords[0], temp_current_coords[1], \
                                     temp_new_coords[0], temp_new_coords[1])
         
-        if temp_dist > Config.EDGE_COST:
+        if temp_dist > self._edge_cost:
             temp_dist = math.inf
             for neighbor in self._graph_list[i].graph[self._s_current_names[i]].children:
                 # print("Neighbor Name:", neighbor, "Distance from ")
-                neighbor_coords = stateNameToCoords(neighbor, Config.EDGE_COST)
+                neighbor_coords = stateNameToCoords(neighbor, self._edge_cost)
                 new_temp_dist = l2_distance(temp_new_coords[0], temp_new_coords[1], neighbor_coords[0], neighbor_coords[1])
 
                 if new_temp_dist < temp_dist:
@@ -210,13 +214,13 @@ class Explorer(object):
                         y = neighbor_coords[1]
                         temp_dist = new_temp_dist
 
-            self._s_new_names[i] = stateCoordsToName(x, y, Config.EDGE_COST)
+            self._s_new_names[i] = stateCoordsToName(x, y, self._edge_cost)
             
     
     def _reach_region_and_explore(self):
         
         # TODO: Incase obs on region assigned road handle this situation
-        status = [[]] * Config.NO_OF_AGENTS
+        status = [[]] * self._no_of_agents
         mission_complete = False
         while not mission_complete:
             h_stacked_images = self._update_display()
@@ -234,11 +238,11 @@ class Explorer(object):
             for el in self._mission_stages_list:
                 if el['region_reached'] and el['region_explored']:
                     count += 1
-                if count == Config.NO_OF_AGENTS:
+                if count == self._no_of_agents:
                     mission_complete = True
                     cv2.imwrite("Mapped_Grid.png", self._mapped_grid)
                     cv2.imwrite("Grid_with_regions_explore_with_trajectories.png", h_stacked_images)
-                    if Config.VERBOSE:
+                    if self._verbose:
                         print("\nAll agents have Explored Assigned Regions.", "\n")
                         print("Agent's Current Node Names: ", self._s_new_names, "\n")
                         print("-----------------------------------------------------------")
@@ -248,8 +252,17 @@ class Explorer(object):
 
             for i in range(len(self._graph_list)):
                 if not self._mission_stages_list[i]['region_reached']:
+
                     self._s_new_names[i], self._k_m_list[i] = moveAndRescan(self._graph_list[i], \
-                        self._queue_list[i], self._s_current_names[i], Config.SENSOR_RANGE, self._k_m_list[i],i)
+                        self._queue_list[i], self._s_current_names[i], self._sensor_range, self._k_m_list[i],i)
+
+                    temp_coords = stateNameToCoords(self._assigned_region_node_names[i], self._edge_cost)    
+                    if np.all(self._mapped_grid[temp_coords[0], temp_coords[1]] == [0, 0, 0], axis=-1):
+                        if not self._mission_stages_list[i]['region_reached']:
+                            self._mission_stages_list[i]['region_reached'] = True
+                            if self._verbose:
+                                print("Agent: {} has reached assigned region.".format(i))
+                        
                 
                 if self._mission_stages_list[i]['region_reached'] and not self._mission_stages_list[i]['region_explored']:
                     
@@ -262,7 +275,7 @@ class Explorer(object):
                         self._graph_list[i], self._queue_list[i], self._k_m_list[i] = status[i]
                 
                         self._s_new_names[i], self._k_m_list[i] = runTimeRescanAndMove(self._graph_list[i], \
-                            self._queue_list[i], self._s_current_names[i], Config.SENSOR_RANGE, self._k_m_list[i],i)
+                            self._queue_list[i], self._s_current_names[i], self._sensor_range, self._k_m_list[i],i)
 
                         if self._s_new_names[i] in self._nodes_to_explore[i] or self._s_new_names[i] == 'goal' or self._s_new_names[i] == None:
                             # print("Explorer:_reach_region_and_explore: Exiting...")
@@ -270,14 +283,14 @@ class Explorer(object):
                             
                 if self._s_new_names[i] != 'goal' and self._s_new_names[i] != None:
                     
-                    temp_new_coords = stateNameToCoords(self._s_new_names[i], Config.EDGE_COST)
+                    temp_new_coords = stateNameToCoords(self._s_new_names[i], self._edge_cost)
                     if np.all(self._global_grid[temp_new_coords[0], temp_new_coords[1]] == [255, 255, 255], axis=-1):
                         
                         self._check_max_movement_constraint(i)
-                        self._last_pos[i] = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
+                        self._last_pos[i] = stateNameToCoords(self._s_current_names[i], self._edge_cost)
                         self._s_current_names[i] = self._s_new_names[i]
                         # print("Explorer:_reach_region_and_explore: s current updated", i, self._s_current_names[i])
-                        temp_coord = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
+                        temp_coord = stateNameToCoords(self._s_current_names[i], self._edge_cost)
                         self._agent_handler.set_pos_of_agent(i, temp_coord[1], temp_coord[0])
                     
                 if self._s_current_names[i] in self._nodes_to_explore[i]:
@@ -286,18 +299,18 @@ class Explorer(object):
                 if self._s_current_names[i] == self._assigned_region_node_names[i]:
                     if not self._mission_stages_list[i]['region_reached']:
                         self._mission_stages_list[i]['region_reached'] = True
-                        if Config.VERBOSE:
+                        if self._verbose:
                             print("Agent: {} has reached assigned region.".format(i))
                     
                 if len(self._nodes_to_explore[i]) == 0:
                     if not self._mission_stages_list[i]['region_explored']:
                         self._mission_stages_list[i]['region_explored'] = True
-                        if Config.VERBOSE:
+                        if self._verbose:
                             print("Agent: {} has explored assigned region.".format(i))
                         
-                temp_coords = stateNameToCoords(self._s_current_names[i], Config.EDGE_COST)
+                temp_coords = stateNameToCoords(self._s_current_names[i], self._edge_cost)
                 if np.all(self._global_grid[temp_coords[0], temp_coords[1]] == [0, 0, 0], axis=-1):
-                    if Config.VERBOSE: print("On An Obstacle :-P Not Possible.........")
+                    if self._verbose: print("On An Obstacle :-P Not Possible.........")
                     while(1):
                         cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', h_stacked_images)
                         k = cv2.waitKey(1) & 0xFF
@@ -315,9 +328,9 @@ class Explorer(object):
                 k = cv2.waitKey(1) & 0xFF
                 time.sleep(1)
 
-        if Config.VERBOSE: print("Shutting Down...", "\n")
+        if self._verbose: print("Shutting Down...", "\n")
         cv2.destroyAllWindows()
-        if Config.VERBOSE: print("Shutting Down Successful.\n")
+        if self._verbose: print("Shutting Down Successful.\n")
 
 
     def _draw_path_of_all_agents_on_separate_grid(self):
@@ -329,8 +342,8 @@ class Explorer(object):
             temp_grid = copy.copy(self._global_grid)
 
             for i in range(len(el)-1):
-                temp_coord_1 = stateNameToCoords(el[i], Config.EDGE_COST)
-                temp_coord_2 = stateNameToCoords(el[i+1], Config.EDGE_COST)
+                temp_coord_1 = stateNameToCoords(el[i], self._edge_cost)
+                temp_coord_2 = stateNameToCoords(el[i+1], self._edge_cost)
 
                 temp_grid = cv2.line(temp_grid, (temp_coord_1[0], temp_coord_1[1]), \
                 (temp_coord_2[0], temp_coord_2[1]), (self._agent_color_list[ind]), 2)
@@ -342,7 +355,7 @@ class Explorer(object):
 
     def run(self):
         
-        if Config.VERBOSE:
+        if self._verbose:
             print("-----------------------------------------------------------")
             print("--------------------REGION-EXPLORATION---------------------")
             print("-----------------------------------------------------------\n")
@@ -363,7 +376,7 @@ class Explorer(object):
 
         #     display = copy.copy(temp_occupancy_grid_with_obs)
 
-        #     for i in range(Config.NO_OF_AGENTS):
+        #     for i in range(self._no_of_agents):
 
         #         temp_pos = agenthandler.get_pos_of_agent(i)
 

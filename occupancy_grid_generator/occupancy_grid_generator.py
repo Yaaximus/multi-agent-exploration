@@ -74,7 +74,7 @@ class OccupancyGridGenerator(object):
             random_x = np.random.randint(200, self._grid_width-200)
             random_y = np.random.randint(200, self._grid_len-200)
 
-            # random_x = 170
+            # random_x = 230
             # random_y = 350
             pts = np.array([[random_x, random_y],[random_x+40, random_y],[random_x+40, random_y-40],[random_x, random_y-40]], np.int32)
             

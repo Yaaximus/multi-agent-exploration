@@ -18,7 +18,7 @@ class Mapper(object):
         self._sensor_range = Config.SENSOR_RANGE
         self._agent_color_list = agent_handler.get_all_agent_color_list()
         self._global_grid = copy.copy(global_grid)
-        self._mapped_grid = np.zeros(shape=[self._grid_len, self._grid_width, 3], dtype=np.uint8)
+        self._mapped_grid = 224 * np.ones(shape=[self._grid_len, self._grid_width, 3], dtype=np.uint8)
         self._mapped_grid = cv2.copyMakeBorder(self._mapped_grid, 10, 10, 10, 10, cv2.BORDER_CONSTANT)
 
     
