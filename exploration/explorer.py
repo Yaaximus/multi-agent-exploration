@@ -261,8 +261,8 @@ class Explorer(object):
         
         # TODO: Incase obs on region assigned road handle this situation
         status = [[]] * self._no_of_agents
-        mission_complete = False
-        while not mission_complete:
+        self._mission_complete = False
+        while not self._mission_complete:
             simulation_img = self._update_display()
             cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
             k = cv2.waitKey(1) & 0xFF
@@ -280,7 +280,7 @@ class Explorer(object):
                 if el['region_reached'] and el['region_explored']:
                     count += 1
                 if count == self._no_of_agents:
-                    mission_complete = True
+                    self._mission_complete = True
                     cv2.imwrite(os.path.join(self._path_to_save_results, "Mapped_Grid.png"), self._mapped_grid)
                     temp_file_name = "Grid_with_regions_explore_with_trajectories.png"
                     cv2.imwrite(os.path.join(self._path_to_save_results, temp_file_name), simulation_img)
@@ -362,13 +362,13 @@ class Explorer(object):
 
                         time.sleep(0.5)
 
-        while(1):
-            if k == ord('q'):
-                break
-            else:
-                cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
-                k = cv2.waitKey(1) & 0xFF
-                time.sleep(1)
+        # while(1):
+        #     if k == ord('q'):
+        #         break
+        #     else:
+        #         cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
+        #         k = cv2.waitKey(1) & 0xFF
+        #         time.sleep(1)
 
         if self._verbose: print("Shutting Down...", "\n")
         cv2.destroyAllWindows()
@@ -406,6 +406,8 @@ class Explorer(object):
         self._get_nodes_to_explore()
         self._reach_region_and_explore()
         self._draw_path_of_all_agents_on_separate_grid()
+
+        return self._mission_complete
 
 
     def _temp_manual_control(self):

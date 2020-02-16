@@ -96,7 +96,7 @@ class OccupancyGridGenerator(object):
         self._grid_without_obs = cv2.copyMakeBorder(self._grid_without_obs, 10, 10, 10, 10, cv2.BORDER_CONSTANT)
         self._add_entrance_into_map()
 
-        if self._complexity_level == "very easy":
+        if self._complexity_level == "very_easy":
             self._add_ostacles(no_of_obs=1)
 
         elif self._complexity_level == "easy":

@@ -5,10 +5,14 @@ import copy
 import time
 import math
 import shutil
+import warnings
 import argparse
 
 import numpy as np
+import pandas as pd
 from cv2 import cv2
+
+import matplotlib.pyplot as plt
 
 from config.Config import Config
 from exploration.explorer import Explorer
@@ -20,6 +24,7 @@ from utils.graph import get_closest_vertex_coords_on_graph_from_pos
 from region_assignment.hungarian_region_assignment import HungarianRegionAssignment
 from occupancy_grid_generator.occupancy_grid_generator import OccupancyGridGenerator
 
+warnings.filterwarnings("ignore")
 
 verbose = Config.VERBOSE
 grid_len = Config.GRID_LEN
@@ -28,7 +33,9 @@ grid_width = Config.GRID_WIDTH
 show_results = Config.SHOW_RESULTS
 sensor_range = Config.SENSOR_RANGE
 no_of_agents = Config.NO_OF_AGENTS
+complexity_level = Config.COMPLEXITY_LEVEL
 path_to_save_results = Config.PATH_TO_SAVE_RESULTS
+
 
 if os.path.isdir(path_to_save_results):
     if verbose:
@@ -71,6 +78,7 @@ def grid_world(temp_occupancy_grid_without_obs):
         print("Edge Cost:", edge_cost, ", Sensor Range:", sensor_range, "\n")
         # print(", Grid Node Width:", X_DIM, ", Grid Node Height:", Y_DIM)
     
+    # X_DIM = int(grid_width/edge_cost)
     X_DIM = int(grid_width/edge_cost)
     Y_DIM = int(grid_len/edge_cost)
 
@@ -210,7 +218,45 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
     return goal_pos, color_map, temp_regions_cols, grid_with_regions
 
 
+def time_stats(start_time, mission_complete_status):
+    
+    end_time = time.time()
+    
+    if mission_complete_status:
+        temp_complete_path = os.path.join(os.getcwd(), "results")
+        os.makedirs(temp_complete_path, exist_ok=True)
+
+        exploration_data = pd.read_csv(os.path.join(temp_complete_path, complexity_level + '.csv'), delimiter=',')
+        exploration_data['exploration_time'][int(no_of_agents-1)] = float(end_time-start_time)
+
+        exploration_data.to_csv(os.path.join(temp_complete_path, complexity_level + '.csv'), index=None)
+        
+        temp_no_of_agents_list = []
+        temp_time_list = []
+
+
+        for i in range(len(exploration_data)):
+            if exploration_data.iloc[i]['exploration_time'] != np.nan or exploration_data.iloc[i]['exploration_time'] != 0 or exploration_data.iloc[i]['exploration_time'] != np.inf:
+                temp_no_of_agents_list.append(exploration_data.iloc[i]['no_of_agents'])
+                temp_time_list.append(exploration_data.iloc[i]['exploration_time'])
+
+        plt.figure()
+        plt.plot(temp_no_of_agents_list, temp_time_list, 'bo')
+        plt.plot(temp_no_of_agents_list, temp_time_list, 'b-')
+        plt.savefig(os.path.join(path_to_save_results, 'agent_vs_time_plot.png'))
+        plt.xlabel('Number of Agents')
+        plt.ylabel('Time(sec)')
+        
+        if show_results:
+            plt.show()
+        
+        if verbose:
+            print("Time to complete Multi Agent Exploration Mission: {} seconds.".format(end_time-start_time))
+
+
 def main():
+
+    start_time = time.time()
 
     if verbose:
         print("-----------------------------------------------------------")
@@ -245,7 +291,13 @@ def main():
                         assigned_region_node_names=goal_pos, graph_list=temp_graph_list, \
                         agenthandler=agenthandler, color_map=color_map_new, regions_cols=regions_cols, \
                         grid_with_regions=temp_grid_with_regions, grid_with_regions_info=grid_with_regions)
-    explorer.run()
+    
+    mission_complete_status = explorer.run()
+    
+    # -------------------------Time Stats--------------------------- #
+
+    time_stats(start_time, mission_complete_status)
+    
     # -------------------------------------------------------------- #
 
 
