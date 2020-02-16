@@ -18,7 +18,7 @@ from d_star_lite.d_star_lite import initDStarLite, moveAndRescan, runTimeRescanA
 class Explorer(object):
     
     def __init__(self, global_grid, known_grid, assigned_region_node_names, graph_list, \
-                 agenthandler, color_map, grid_with_regions):
+                 agenthandler, color_map, regions_cols, grid_with_regions, grid_with_regions_info): 
         
         self._mapped_grid = None
         self._color_map = color_map
@@ -27,11 +27,13 @@ class Explorer(object):
         self._graph_list = graph_list
         self._verbose = Config.VERBOSE
         self._global_grid = global_grid
+        self._region_col = regions_cols
         self._grid_len = Config.GRID_LEN
         self._agent_handler = agenthandler
         self._edge_cost = Config.EDGE_COST
         self._grid_width = Config.GRID_WIDTH
-        self._display = copy.copy(global_grid)
+        self._font = cv2.FONT_HERSHEY_SIMPLEX
+        self._grid_with_regions_display = None
         self._known_grid = copy.copy(known_grid)
         self._no_of_agents = Config.NO_OF_AGENTS
         self._sensor_range = Config.SENSOR_RANGE
@@ -46,6 +48,9 @@ class Explorer(object):
         self._avoiding_obs = [False] * self._no_of_agents
         self._s_current_names = [''] * self._no_of_agents
         self._nodes_to_explore = [[]] * self._no_of_agents
+        self._known_grid_display = copy.copy(known_grid)
+        self._global_grid_display = copy.copy(global_grid)
+        self._grid_with_regions_info = grid_with_regions_info
         self._path_to_save_results = Config.PATH_TO_SAVE_RESULTS
         self._assigned_region_node_names = assigned_region_node_names
         self._agents_path_flow = [[] for _ in range(self._no_of_agents)]
@@ -98,7 +103,9 @@ class Explorer(object):
 
         self._iteration_step += 1
         
-        self._display = copy.copy(self._global_grid)
+        self._known_grid_display = copy.copy(self._known_grid)
+        self._global_grid_display = copy.copy(self._global_grid)
+        self._grid_with_regions_display = copy.copy(self._grid_with_regions_info)
         
         for i in range(self._no_of_agents):
             
@@ -110,25 +117,40 @@ class Explorer(object):
             self._update_agents_on_map(i, temp_pos_x, temp_pos_y)
             self._map_world(i, temp_pos)
         
-        temp_img_with_agents = cv2.resize(self._img_with_agents, (512, 512))
-        self._mapped_grid = self._grid_mapper.get_mapped_grid()
-        temp_mapped_img = cv2.resize(self._mapped_grid, (512, 512))
+        temp_x, temp_y = 580, 340
 
-        h_stacke_image = np.hstack((temp_img_with_agents, temp_mapped_img))
+        temp_gloabal_grid_with_agents = cv2.resize(self._gloabal_grid_with_agents, (temp_x, temp_y))
+        temp_known_grid_with_agents = cv2.resize(self._known_grid_with_agents, (temp_x, temp_y))
+        temp_grid_with_agents_and_regions = cv2.resize(self._grid_with_agents_and_regions, (temp_x, temp_y))
+
+        self._mapped_grid = self._grid_mapper.get_mapped_grid()
+        temp_mapped_img = cv2.resize(self._mapped_grid, (temp_x, temp_y))
+
+        h1_stack_image = np.hstack((temp_gloabal_grid_with_agents, temp_mapped_img))
+        h2_stack_image = np.hstack((temp_known_grid_with_agents, temp_grid_with_agents_and_regions))
+        simulation_img = np.vstack((h1_stack_image, h2_stack_image))
         
         temp_file_name = str(self._iteration_step) + ".png"
-        cv2.imwrite(os.path.join(self._path_to_save_simulation_results, temp_file_name), h_stacke_image)
+        cv2.imwrite(os.path.join(self._path_to_save_simulation_results, temp_file_name), simulation_img)
 
-        return h_stacke_image
+        return simulation_img
 
     
     def _update_agents_on_map(self, i, temp_pos_x, temp_pos_y):
         
         color_b,color_g,color_r = self._agent_color_list[i]
 
-        self._img_with_agents = cv2.ellipse(self._display,(temp_pos_x,temp_pos_y),\
+        self._gloabal_grid_with_agents = cv2.ellipse(self._global_grid_display,(temp_pos_x,temp_pos_y),\
                                             (10,10),0,15,345,(color_b,color_g,color_r),-1)
-    
+
+        self._known_grid_with_agents = cv2.ellipse(self._known_grid_display,(temp_pos_x,temp_pos_y),\
+                                            (10,10),0,15,345,(color_b,color_g,color_r),-1)
+
+        string_to_add = "Agent:" + str(i) + ", region:" + str(self._region_col[i])
+        self._grid_with_regions_display = cv2.putText(self._grid_with_regions_display, string_to_add,(temp_pos_x,temp_pos_y+25), self._font, 0.5,(0,0,0),2,cv2.LINE_AA)
+
+        self._grid_with_agents_and_regions = cv2.ellipse(self._grid_with_regions_display,(temp_pos_x,temp_pos_y),(10,10),0,15,345,(color_b,color_g,color_r),-1)        
+        
     
     def _map_world(self, i, temp_pos):
         
@@ -241,8 +263,8 @@ class Explorer(object):
         status = [[]] * self._no_of_agents
         mission_complete = False
         while not mission_complete:
-            h_stacked_images = self._update_display()
-            cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', h_stacked_images)
+            simulation_img = self._update_display()
+            cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
             k = cv2.waitKey(1) & 0xFF
 
             if k == ord('q'):
@@ -251,7 +273,7 @@ class Explorer(object):
                 break
 
             # time.sleep(0.5)
-            time.sleep(0.5)
+            time.sleep(0.2)
 
             count = 0
             for el in self._mission_stages_list:
@@ -261,7 +283,7 @@ class Explorer(object):
                     mission_complete = True
                     cv2.imwrite(os.path.join(self._path_to_save_results, "Mapped_Grid.png"), self._mapped_grid)
                     temp_file_name = "Grid_with_regions_explore_with_trajectories.png"
-                    cv2.imwrite(os.path.join(self._path_to_save_results, temp_file_name), h_stacked_images)
+                    cv2.imwrite(os.path.join(self._path_to_save_results, temp_file_name), simulation_img)
                     if self._verbose:
                         print("\nAll agents have Explored Assigned Regions.", "\n")
                         print("Agent's Current Node Names: ", self._s_new_names, "\n")
@@ -332,7 +354,7 @@ class Explorer(object):
                 if np.all(self._global_grid[temp_coords[0], temp_coords[1]] == [0, 0, 0], axis=-1):
                     if self._verbose: print("On An Obstacle :-P Not Possible.........")
                     while(1):
-                        cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', h_stacked_images)
+                        cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
                         k = cv2.waitKey(1) & 0xFF
 
                         if k == ord('q'):
@@ -344,7 +366,7 @@ class Explorer(object):
             if k == ord('q'):
                 break
             else:
-                cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', h_stacked_images)
+                cv2.imshow('MULTI AGENT EXPLORER SIMULATOR', simulation_img)
                 k = cv2.waitKey(1) & 0xFF
                 time.sleep(1)
 

@@ -180,6 +180,7 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
         hungaian_region_assignment.show_assigned_regions()
 
     grid_with_regions_and_agents = hungaian_region_assignment.get_grid_with_regions_and_agents()
+    grid_with_regions = hungaian_region_assignment.get_grid_with_regions()
 
     temp_file_name = "Grid_with_agents_and_respective_region.png"
     cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), grid_with_regions_and_agents)
@@ -206,7 +207,7 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
 
         print("\nTotal cost:", int(hungaian_region_assignment.get_total_cost()), "\n")
     
-    return goal_pos, color_map
+    return goal_pos, color_map, temp_regions_cols, grid_with_regions
 
 
 def main():
@@ -235,15 +236,15 @@ def main():
     
     # --------------------- REGION ASSIGNMENT ---------------------- #
     
-    goal_pos, color_map_new = region_assignment(temp_region_centroids, agenthandler, temp_grid_with_regions, \
-                      temp_graph_list, temp_grid_with_nodes, temp_color_map)
+    goal_pos, color_map_new, regions_cols, grid_with_regions = region_assignment(temp_region_centroids, agenthandler, \
+        temp_grid_with_regions, temp_graph_list, temp_grid_with_nodes, temp_color_map)
     
     # ------------------------- Explorer --------------------------- #
     
     explorer = Explorer(global_grid=temp_occupancy_grid_with_obs, known_grid=temp_occupancy_grid_without_obs, \
                         assigned_region_node_names=goal_pos, graph_list=temp_graph_list, \
-                        agenthandler=agenthandler, color_map=color_map_new, \
-                        grid_with_regions=temp_grid_with_regions)
+                        agenthandler=agenthandler, color_map=color_map_new, regions_cols=regions_cols, \
+                        grid_with_regions=temp_grid_with_regions, grid_with_regions_info=grid_with_regions)
     explorer.run()
     # -------------------------------------------------------------- #
 

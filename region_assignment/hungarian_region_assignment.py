@@ -19,11 +19,12 @@ class HungarianRegionAssignment(object):
 
         self._row_ind = None
         self._col_ind = None
+        self._grid_with_regions = None
         self._cost_matrix = cost_matrix
         self._agenthandler = agenthandler
         self._grid = copy.copy(occupancy_grid)
         self._no_of_agents = Config.NO_OF_AGENTS
-        self._region_centroids = region_centroids
+        self._region_centroids = region_centroids  
         self._grid_with_regions_and_agents = None        
         self._agent_color_list = self._agenthandler.get_all_agent_color_list()
 
@@ -42,7 +43,26 @@ class HungarianRegionAssignment(object):
 
         return self._cost_matrix[self._row_ind, self._col_ind].sum()
 
-    
+
+    def grid_with_region(self):
+
+        temp_grid = copy.copy(self._grid)
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+
+        for i in range(len(self._region_centroids)):
+            b = np.array(self._region_centroids[i])
+            string_to_add = "Region" + str(i)
+            temp_grid = cv2.putText(temp_grid, string_to_add,(b[0],b[1]-20), font, 0.5,(0,0,0),2,cv2.LINE_AA)
+
+        self._grid_with_regions = temp_grid        
+
+
+    def get_grid_with_regions(self):
+
+        return self._grid_with_regions
+
+
     def get_grid_with_regions_and_agents(self):
 
         return self._grid_with_regions_and_agents
@@ -50,7 +70,8 @@ class HungarianRegionAssignment(object):
 
     def place_agents_on_grid_with_info_of_assigned_region(self):
 
-        temp_grid = copy.copy(self._grid)
+        self.grid_with_region()
+        temp_grid = copy.copy(self._grid_with_regions)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         
@@ -64,11 +85,6 @@ class HungarianRegionAssignment(object):
             color_b,color_g,color_r = self._agent_color_list[i]
 
             temp_grid = cv2.ellipse(temp_grid,(a[0],a[1]),(10,10),0,15,345,(color_b,color_g,color_r),-1)
-
-        for j in range(len(self._region_centroids)):
-            b = np.array(self._region_centroids[j])
-            string_to_add = "Region" + str(j)
-            temp_grid = cv2.putText(temp_grid, string_to_add,(b[0],b[1]-20), font, 0.5,(0,0,0),2,cv2.LINE_AA)
 
         self._grid_with_regions_and_agents = temp_grid        
 

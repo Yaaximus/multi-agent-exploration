@@ -2,7 +2,7 @@
 
 verbose: False
 show_results: False
-no_of_agents: 6
+no_of_agents: 5
 sensor_range: 45
 # grid_len: 612
 # grid_width: 612
