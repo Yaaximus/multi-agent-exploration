@@ -22,9 +22,9 @@ class HungarianRegionAssignment(object):
         self._cost_matrix = cost_matrix
         self._agenthandler = agenthandler
         self._grid = copy.copy(occupancy_grid)
+        self._no_of_agents = Config.NO_OF_AGENTS
         self._region_centroids = region_centroids
-        self._grid_with_regions_and_agents = None
-        
+        self._grid_with_regions_and_agents = None        
         self._agent_color_list = self._agenthandler.get_all_agent_color_list()
 
     
@@ -54,7 +54,7 @@ class HungarianRegionAssignment(object):
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(self._no_of_agents):
             
             temp_agent_pos = self._agenthandler.get_pos_of_agent(i)
             a = np.array([temp_agent_pos['x'], temp_agent_pos['y']])

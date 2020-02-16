@@ -1,3 +1,4 @@
+import os
 import time
 import math
 import copy
@@ -18,15 +19,18 @@ class Explorer(object):
     
     def __init__(self, global_grid, known_grid, assigned_region_node_names, graph_list, \
                  agenthandler, color_map, grid_with_regions):
-                
+        
         self._mapped_grid = None
         self._color_map = color_map
+        self._iteration_step = 0
         self._img_with_agents = None
         self._graph_list = graph_list
         self._verbose = Config.VERBOSE
         self._global_grid = global_grid
+        self._grid_len = Config.GRID_LEN
         self._agent_handler = agenthandler
         self._edge_cost = Config.EDGE_COST
+        self._grid_width = Config.GRID_WIDTH
         self._display = copy.copy(global_grid)
         self._known_grid = copy.copy(known_grid)
         self._no_of_agents = Config.NO_OF_AGENTS
@@ -38,13 +42,15 @@ class Explorer(object):
         self._s_new_names = [''] * self._no_of_agents
         self._s_last_names = [''] * self._no_of_agents
         self._s_start_names = [''] * self._no_of_agents
+        self._complexity_level = Config.COMPLEXITY_LEVEL
         self._avoiding_obs = [False] * self._no_of_agents
         self._s_current_names = [''] * self._no_of_agents
         self._nodes_to_explore = [[]] * self._no_of_agents
-        self._agents_path_flow = [[] for _ in range(self._no_of_agents)]
-        self._grid_mapper = Mapper(global_grid=self._global_grid, agent_handler=self._agent_handler)
+        self._path_to_save_results = Config.PATH_TO_SAVE_RESULTS
         self._assigned_region_node_names = assigned_region_node_names
+        self._agents_path_flow = [[] for _ in range(self._no_of_agents)]
         self._agent_color_list = self._agent_handler.get_all_agent_color_list()
+        self._grid_mapper = Mapper(global_grid=self._global_grid, agent_handler=self._agent_handler)
         
         temp_coord = [0,0]
         self._mission_stages_list = []
@@ -68,6 +74,11 @@ class Explorer(object):
                                                                             self._assigned_region_node_names[i], \
                                                                             self._k_m_list[i])
 
+        self._path_to_save_simulation_results = os.path.join(self._path_to_save_results, "simulation")
+        self._path_to_save_agents_path = os.path.join(self._path_to_save_results, "agents_paths")
+        os.makedirs(self._path_to_save_simulation_results, exist_ok=True)
+        os.makedirs(self._path_to_save_agents_path, exist_ok=True)
+
         if self._verbose:
             print("Explorer: START NODE NAMES:\n")
             print(self._s_start_names, "\n")
@@ -84,6 +95,8 @@ class Explorer(object):
             
     
     def _update_display(self):
+
+        self._iteration_step += 1
         
         self._display = copy.copy(self._global_grid)
         
@@ -100,8 +113,13 @@ class Explorer(object):
         temp_img_with_agents = cv2.resize(self._img_with_agents, (512, 512))
         self._mapped_grid = self._grid_mapper.get_mapped_grid()
         temp_mapped_img = cv2.resize(self._mapped_grid, (512, 512))
+
+        h_stacke_image = np.hstack((temp_img_with_agents, temp_mapped_img))
         
-        return np.hstack((temp_img_with_agents, temp_mapped_img))
+        temp_file_name = str(self._iteration_step) + ".png"
+        cv2.imwrite(os.path.join(self._path_to_save_simulation_results, temp_file_name), h_stacke_image)
+
+        return h_stacke_image
 
     
     def _update_agents_on_map(self, i, temp_pos_x, temp_pos_y):
@@ -174,8 +192,8 @@ class Explorer(object):
         else:
             self._avoiding_obs[i] = True
             # print("Explorer:_explore_assigned_region: Obstalce b/w node.")
-            X_DIM = int(Config.GRID_WIDTH/self._edge_cost)
-            Y_DIM = int(Config.GRID_LEN/self._edge_cost)
+            X_DIM = int(self._grid_width/self._edge_cost)
+            Y_DIM = int(self._grid_len/self._edge_cost)
             temp_graph = GridWorld(X_DIM, Y_DIM, self._known_grid)
             temp_graph.run()
             temp_queue = []
@@ -228,7 +246,8 @@ class Explorer(object):
             k = cv2.waitKey(1) & 0xFF
 
             if k == ord('q'):
-                print("Mission Aborted!")
+                if self._verbose:
+                    print("Mission Aborted!")
                 break
 
             # time.sleep(0.5)
@@ -240,8 +259,9 @@ class Explorer(object):
                     count += 1
                 if count == self._no_of_agents:
                     mission_complete = True
-                    cv2.imwrite("Mapped_Grid.png", self._mapped_grid)
-                    cv2.imwrite("Grid_with_regions_explore_with_trajectories.png", h_stacked_images)
+                    cv2.imwrite(os.path.join(self._path_to_save_results, "Mapped_Grid.png"), self._mapped_grid)
+                    temp_file_name = "Grid_with_regions_explore_with_trajectories.png"
+                    cv2.imwrite(os.path.join(self._path_to_save_results, temp_file_name), h_stacked_images)
                     if self._verbose:
                         print("\nAll agents have Explored Assigned Regions.", "\n")
                         print("Agent's Current Node Names: ", self._s_new_names, "\n")
@@ -348,7 +368,8 @@ class Explorer(object):
                 temp_grid = cv2.line(temp_grid, (temp_coord_1[0], temp_coord_1[1]), \
                 (temp_coord_2[0], temp_coord_2[1]), (self._agent_color_list[ind]), 2)
 
-            cv2.imwrite("Grid_with_Path_of_Agent_{}_.png".format(ind), temp_grid)
+            temp_file_name = "Grid_with_Path_of_Agent_{}_.png".format(ind)
+            cv2.imwrite(os.path.join(self._path_to_save_agents_path, temp_file_name), temp_grid)
 
             ind += 1
 

@@ -1,8 +1,10 @@
 #!usr/bin/env python
 
+import os
 import copy
 import time
 import math
+import shutil
 import argparse
 
 import numpy as np
@@ -19,9 +21,25 @@ from region_assignment.hungarian_region_assignment import HungarianRegionAssignm
 from occupancy_grid_generator.occupancy_grid_generator import OccupancyGridGenerator
 
 
+verbose = Config.VERBOSE
+grid_len = Config.GRID_LEN
+edge_cost = Config.EDGE_COST
+grid_width = Config.GRID_WIDTH
+show_results = Config.SHOW_RESULTS
+sensor_range = Config.SENSOR_RANGE
+no_of_agents = Config.NO_OF_AGENTS
+path_to_save_results = Config.PATH_TO_SAVE_RESULTS
+
+if os.path.isdir(path_to_save_results):
+    if verbose:
+        print("Previous results exists, Clearing...")
+    shutil.rmtree(path_to_save_results)
+
+os.makedirs(path_to_save_results, exist_ok=True)
+
 def occupancy_grid_generator():
 
-    if Config.VERBOSE:
+    if verbose:
         print("-----------------------------------------------------------")
         print("----------------OCCUPANCY-GRID-GENERATOR-------------------")
         print("-----------------------------------------------------------\n")
@@ -29,41 +47,43 @@ def occupancy_grid_generator():
     occupancy_grid = OccupancyGridGenerator()
     occupancy_grid.generate_occupancy_grid()
 
-    if Config.SHOW_RESULTS:
+    if show_results:
         occupancy_grid.show_occupancy_grid_without_obs()
         occupancy_grid.show_occupancy_grid_with_obs()
     
     temp_occupancy_grid_without_obs = occupancy_grid.get_occupancy_grid_without_obs()
     temp_occupancy_grid_with_obs = occupancy_grid.get_occupancy_grid_with_obs()
 
-    cv2.imwrite("Grid_with_Obstacles.png", temp_occupancy_grid_with_obs)
-    cv2.imwrite("Grid_without_Obstacles.png", temp_occupancy_grid_without_obs)
+    temp_file_name = "Grid_with_Obstacles.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_occupancy_grid_with_obs)
+    temp_file_name = "Grid_without_Obstacles.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_occupancy_grid_without_obs)
     
     return temp_occupancy_grid_without_obs, temp_occupancy_grid_with_obs
 
 
 def grid_world(temp_occupancy_grid_without_obs):
 
-    if Config.VERBOSE:
+    if verbose:
         print("-----------------------------------------------------------")
         print("-------------------GRID-WORLD-GENERATOR--------------------")
         print("-----------------------------------------------------------\n")
-        print("Edge Cost:", Config.EDGE_COST, ", Sensor Range:", Config.SENSOR_RANGE, "\n")
+        print("Edge Cost:", edge_cost, ", Sensor Range:", sensor_range, "\n")
         # print(", Grid Node Width:", X_DIM, ", Grid Node Height:", Y_DIM)
     
-    X_DIM = int(Config.GRID_WIDTH/Config.EDGE_COST)
-    Y_DIM = int(Config.GRID_LEN/Config.EDGE_COST)
+    X_DIM = int(grid_width/edge_cost)
+    Y_DIM = int(grid_len/edge_cost)
 
     graph_list = []
 
-    for i in range(Config.NO_OF_AGENTS):
+    for i in range(no_of_agents):
 
         graph_list.append(GridWorld(X_DIM, Y_DIM, temp_occupancy_grid_without_obs))
 
         graph_list[i].run()
         # temp_graph = copy.copy(graph.get_graph())
 
-    if Config.SHOW_RESULTS:
+    if show_results:
         graph_list[-1].show_nodes_on_occupancy_grid()
         graph_list[-1].show_nodes_and_edges_with_obs_on_occupancy_grid()
         graph_list[-1].show_nodes_and_all_traversable_edges()
@@ -72,9 +92,12 @@ def grid_world(temp_occupancy_grid_without_obs):
     temp_grid_with_nodes_and_edges_with_obs = graph_list[-1].get_occupancy_grid_with_nodes_and_edges_with_obs()
     temp_grid_with_nodes_and_all_traversable_edges = graph_list[-1].get_occupancy_grid_with_nodes_and_all_traversable_edges()
 
-    cv2.imwrite("Grid_with_nodes.png", temp_grid_with_nodes)
-    cv2.imwrite("Grid_with_red_lines_bw_non_traversable_nodes.png", temp_grid_with_nodes_and_edges_with_obs)
-    cv2.imwrite("Grid_with_blue_lines_bw_traversable_nodes.png", temp_grid_with_nodes_and_all_traversable_edges)
+    temp_file_name = "Grid_with_nodes.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_grid_with_nodes)
+    temp_file_name = "Grid_with_red_lines_bw_non_traversable_nodes.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_grid_with_nodes_and_edges_with_obs)
+    temp_file_name = "Grid_with_blue_lines_bw_traversable_nodes.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_grid_with_nodes_and_all_traversable_edges)
 
     temp_graph_list = copy.copy(graph_list)
     
@@ -83,7 +106,7 @@ def grid_world(temp_occupancy_grid_without_obs):
 
 def k_mean_clustring(temp_occupancy_grid_without_obs):
     
-    if Config.VERBOSE:
+    if verbose:
         print("-----------------------------------------------------------")
         print("---------------------K-MEAN-CLUSTRING----------------------")
         print("-----------------------------------------------------------\n")
@@ -97,18 +120,19 @@ def k_mean_clustring(temp_occupancy_grid_without_obs):
     temp_color_map = regions.get_color_map()
     temp_grid_with_regions = copy.copy(regions.get_grid_with_regions())
     
-    if Config.SHOW_RESULTS:
+    if show_results:
         regions.show_regions_with_centroids()
     # regions.show_regions()
 
-    cv2.imwrite("Grid_with_region_and_centroids.png", temp_grid_with_regions)
+    temp_file_name = "Grid_with_region_and_centroids.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), temp_grid_with_regions)
 
     # ind = 0
     # for el in temp_regions_xy_points:
     #     print("Region", ind, "indices:", el)
     #     ind += 1
 
-    if Config.VERBOSE:
+    if verbose:
         print("Region centroids:\n\n", temp_region_centroids, "\n")
         print("Region color map:\n\n", temp_color_map, "\n")
     
@@ -117,17 +141,17 @@ def k_mean_clustring(temp_occupancy_grid_without_obs):
 
 def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_regions, temp_graph_list, temp_grid_with_nodes, temp_color_map):
 
-    if Config.VERBOSE:
+    if verbose:
         print("-----------------------------------------------------------")
         print("---------------HUNGARIAN-REGION ASSIGNMENT-----------------")
-        print("-----------------------------------------------------------/n")
+        print("-----------------------------------------------------------\n")
 
-    color_map = [[]] * Config.NO_OF_AGENTS
-    goal_pos = [''] * Config.NO_OF_AGENTS
+    color_map = [[]] * no_of_agents
+    goal_pos = [''] * no_of_agents
 
     region_centroids = copy.copy(temp_region_centroids)
 
-    cost_matrix = get_cost_matrix(Config.NO_OF_AGENTS, agenthandler, region_centroids)
+    cost_matrix = get_cost_matrix(no_of_agents, agenthandler, region_centroids)
 
     hungaian_region_assignment = HungarianRegionAssignment(cost_matrix, \
         temp_grid_with_regions, agenthandler, temp_region_centroids)
@@ -143,23 +167,24 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
         temp_x, temp_y = temp_region_centroids[el]
         color_map[ind] = temp_color_map[el]
         temp_goal_pos = get_closest_vertex_coords_on_graph_from_pos(\
-                            temp_graph_list[ind].get_graph(), temp_x, temp_y, Config.EDGE_COST)
+                            temp_graph_list[ind].get_graph(), temp_x, temp_y, edge_cost)
         # print(temp_goal_pos)
-        goal_pos[ind] = stateCoordsToName(temp_goal_pos[1], temp_goal_pos[0], Config.EDGE_COST)
+        goal_pos[ind] = stateCoordsToName(temp_goal_pos[1], temp_goal_pos[0], edge_cost)
 
         ind += 1
         
-    if Config.VERBOSE:
+    if verbose:
         print("\nNew Color Map Order:", color_map, "\n")
 
-    if Config.SHOW_RESULTS:
+    if show_results:
         hungaian_region_assignment.show_assigned_regions()
 
     grid_with_regions_and_agents = hungaian_region_assignment.get_grid_with_regions_and_agents()
 
-    cv2.imwrite("Grid_with_agents_and_respective_region.png", grid_with_regions_and_agents)
+    temp_file_name = "Grid_with_agents_and_respective_region.png"
+    cv2.imwrite(os.path.join(path_to_save_results,temp_file_name), grid_with_regions_and_agents)
 
-    if Config.VERBOSE:
+    if verbose:
         print("Region centroids:\n")
         ind = 1
         for el in region_centroids:
@@ -168,7 +193,7 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
 
         print("\nAgent Positions:\n")
 
-        for i in range(Config.NO_OF_AGENTS):
+        for i in range(no_of_agents):
             temp_agent_pos = agenthandler.get_pos_of_agent(i)
             print("\tAgent:", i+1, ", x:", temp_agent_pos['x'], ", y:", temp_agent_pos['y'])
 
@@ -186,7 +211,7 @@ def region_assignment(temp_region_centroids, agenthandler, temp_grid_with_region
 
 def main():
 
-    if Config.VERBOSE:
+    if verbose:
         print("-----------------------------------------------------------")
         print("-----------------MULTI-AGENT-EXPLORATION-------------------")
         print("-----------------------------------------------------------\n")

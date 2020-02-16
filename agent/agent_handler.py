@@ -8,10 +8,10 @@ class AgentHandler(object):
 
     def __init__(self, graph_list):
 
-        self._no_of_agents = Config.NO_OF_AGENTS
         self._agents = []
         self._agents_color_list = []
         self._graph_list = graph_list
+        self._no_of_agents = Config.NO_OF_AGENTS
 
         for i in range(self._no_of_agents):
 

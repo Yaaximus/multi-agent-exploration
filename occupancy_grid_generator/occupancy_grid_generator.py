@@ -10,12 +10,12 @@ class OccupancyGridGenerator(object):
 
     def __init__(self):
         
+        self._grid_with_obs = None
+        self._grid_without_obs = None
         self._grid_len = Config.GRID_LEN
         self._grid_width = Config.GRID_WIDTH
         self._free_space = Config.FREE_SPACE
         self._complexity_level = Config.COMPLEXITY_LEVEL
-        self._grid_without_obs = None
-        self._grid_with_obs = None
 
 
     def _add_entrance_into_map(self):
@@ -69,7 +69,7 @@ class OccupancyGridGenerator(object):
 
         temp_grid = copy.copy(self._grid_without_obs)
 
-        for ind in range(int(no_of_obs)):
+        for _ in range(int(no_of_obs)):
             
             random_x = np.random.randint(200, self._grid_width-200)
             random_y = np.random.randint(200, self._grid_len-200)

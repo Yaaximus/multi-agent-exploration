@@ -13,21 +13,22 @@ class KMeanClustring(object):
 
     def __init__(self, grid_without_obs):
 
-        self._grid = copy.copy(grid_without_obs)
-        self._grid_with_regions = None
+        self._roi = None
+        self._colmap = []
+        self._centroids = None
+        self._free_points = None
+        self._regions_xy_points = []
+        self._grid_with_regions = None        
         self._grid_len = Config.GRID_LEN
         self._grid_width = Config.GRID_WIDTH
         self._free_space = Config.FREE_SPACE
-        self._centroids = None
-        self._regions_xy_points = []
-        # self._no_of_centroids = self._find_no_of_centroids()    # Function
+        self._grid = copy.copy(grid_without_obs)
         self._no_of_centroids = Config.NO_OF_AGENTS
-        self._free_points = None
-        self._roi = None
-        self._colmap = []
-        self._generate_points()                                 # Function
-        self._generate_color_map()                              # Function
+        
+        self._generate_points()
+        self._generate_color_map()
         # self._get_random_centroids()
+        # self._no_of_centroids = self._find_no_of_centroids()
 
 
     def show_regions_with_centroids(self):
@@ -79,12 +80,10 @@ class KMeanClustring(object):
 
     def _generate_color_map(self):
 
-        for ind in range(self._no_of_centroids):
+        for _ in range(self._no_of_centroids):
 
             temp_bgr = list(np.random.randint(0,255,3))
             self._colmap.append(temp_bgr)
-
-        # colmap = {1: [0,0,255], 2: [0,225,0], 3: [255,0,0], 4:[0,255,255], 5:[255,0,255], 6:[255,255,0], 7:[100,100,100], 8:[100,255,255]}
 
 
     def _find_all_regions_xy_points(self):

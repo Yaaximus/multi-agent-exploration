@@ -12,12 +12,12 @@ class AgentGenerator(object):
 
     def __init__(self, graph):
 
+        self._graph = graph            
         self._grid_len = Config.GRID_LEN
+        self._edge_cost = Config.EDGE_COST
         self._grid_width = Config.GRID_WIDTH
         self._free_space = Config.FREE_SPACE
-        self._edge_cost = Config.EDGE_COST
         self._agent_pos = {'x':None, 'y':None}
-        self._graph = graph
         self._agent_color = np.random.randint(1, 254, 3).tolist()
 
     
@@ -47,7 +47,7 @@ class AgentGenerator(object):
         return self._agent_pos
 
     
-    def move_agent(self, x=Config.EDGE_COST, y=Config.EDGE_COST):
+    def move_agent(self, x, y):
 
         temp_x = self._agent_pos['x']
         temp_y = self._agent_pos['y']
@@ -56,16 +56,15 @@ class AgentGenerator(object):
             self._agent_pos['x'] = self._agent_pos['x'] + x
             self._agent_pos['y'] = self._agent_pos['y'] + y
         else:
-            
             if x > 0:
-                x_to_add = Config.EDGE_COST
+                x_to_add = self._edge_cost
             else:
-                x_to_add = -Config.EDGE_COST
+                x_to_add = - self._edge_cost
 
             if y > 0:
-                y_to_add = Config.EDGE_COST
+                y_to_add = self._edge_cost
             else:
-                y_to_add = -Config.EDGE_COST
+                y_to_add = - self._edge_cost
 
             self._agent_pos['x'] = self._agent_pos['x'] + x_to_add
             self._agent_pos['y'] = self._agent_pos['y'] + y_to_add

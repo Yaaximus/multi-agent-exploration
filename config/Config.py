@@ -21,8 +21,17 @@ default_config = {
     'edge_cost': 40,
     'complexity_level': 'difficult',
     'verbose': True,
-    'show_results': True
+    'show_results': True,
+    'path_to_save_results': None
 }
+
+
+def get_path_to_save_results(obj):
+
+    temp_path = os.path.join(getattr(obj, 'complexity_level'.upper()), str(getattr(obj, 'no_of_agents'.upper())) + "_agents")
+    temp_path = os.path.join("images", temp_path)
+    
+    return os.path.join(os.getcwd(), temp_path)
 
 
 def init_config(cls):
@@ -50,6 +59,10 @@ def init_config(cls):
             setattr(cls, name.upper(), config_dict[name])
         except KeyError:
             setattr(cls, name.upper(), value)
+
+    if getattr(cls, 'path_to_save_results'.upper()) == None:
+        setattr(cls, 'path_to_save_results'.upper(), get_path_to_save_results(cls))
+
 
     return cls
 
