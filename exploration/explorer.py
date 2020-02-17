@@ -172,9 +172,24 @@ class Explorer(object):
                 print("Explorer:_get_nodes_to_explore: Agent {} Color Map:{}".format(i, self._color_map[i]))
             for el in self._graph_list[i].graph:
                 temp_coords = stateNameToCoords(el, self._edge_cost)
-                if np.all(self._grid_with_regions[temp_coords[0], temp_coords[1]] == self._color_map[i], axis=-1):
-                    temp_list.append(el)
+
+                width_min = temp_coords[1] - 5
+                width_max = temp_coords[1] + 5
+                len_min = temp_coords[0] - 5
+                len_max = temp_coords[0] + 5
+
+                temp_grid = copy.copy(self._global_grid)
+                
+                roi = copy.copy(temp_grid[len_min:len_max, width_min:width_max])
+                temp_points = np.where(np.all(roi == [0, 0, 0], axis=-1))
+                
+                if len(temp_points[0])>0 or len(temp_points[1])>0:# print("Obstacle")
+                    pass
+                else:                                             # print("Path Clear")
+                    if np.all(self._grid_with_regions[temp_coords[0], temp_coords[1]] == self._color_map[i], axis=-1):
+                        temp_list.append(el)
                     # print(i, el, self._grid_with_regions[temp_coords[0], temp_coords[1]], self._color_map[i])
+
             self._nodes_to_explore[i] = copy.copy(temp_list)
             # print("Nodes to explore by Agent: {} are {}.".format(i, self._nodes_to_explore[i]))
         if self._verbose: print("")

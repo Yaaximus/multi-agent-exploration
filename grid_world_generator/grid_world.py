@@ -128,14 +128,14 @@ class GridWorld(Graph):
             width_min = temp_coord_1[1] - 5
             width_max = temp_coord_2[1] + 5
         else:
-            width_min = min(temp_coord_1[1], temp_coord_2[1])
-            width_max = max(temp_coord_1[1], temp_coord_2[1])
+            width_min = min(temp_coord_1[1], temp_coord_2[1]) - 5
+            width_max = max(temp_coord_1[1], temp_coord_2[1]) + 5
         if temp_coord_1[0] == temp_coord_2[0]:
             len_min = temp_coord_1[0] - 5
             len_max = temp_coord_2[0] + 5
         else:
-            len_min = min(temp_coord_1[0], temp_coord_2[0])
-            len_max = max(temp_coord_1[0], temp_coord_2[0])
+            len_min = min(temp_coord_1[0], temp_coord_2[0]) - 5
+            len_max = max(temp_coord_1[0], temp_coord_2[0]) + 5
 
         temp_grid = copy.copy(self._grid)
         
