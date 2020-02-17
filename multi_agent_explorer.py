@@ -227,13 +227,30 @@ def time_stats(start_time, mission_complete_status):
         os.makedirs(temp_complete_path, exist_ok=True)
 
         exploration_data = pd.read_csv(os.path.join(temp_complete_path, complexity_level + '.csv'), delimiter=',')
-        exploration_data['exploration_time'][int(no_of_agents-1)] = float(end_time-start_time)
+
+        if exploration_data['no_of_tries'][int(no_of_agents-1)] > 0:
+            temp_time = exploration_data['exploration_time'][int(no_of_agents-1)] * exploration_data['no_of_tries'][int(no_of_agents-1)]
+            new_time = (temp_time + (end_time-start_time)) / (exploration_data['no_of_tries'][int(no_of_agents-1)] + 1)
+            if verbose:
+                print("No of tries > 0")
+                print("Old time:", exploration_data['exploration_time'][int(no_of_agents-1)])
+                print("New time:", new_time)
+            exploration_data['exploration_time'][int(no_of_agents-1)] = new_time
+        else:
+            if verbose:
+                print("No of tries = 0")
+                print("Old time:", exploration_data['exploration_time'][int(no_of_agents-1)])
+                print("New time:", float(end_time-start_time))
+            exploration_data['exploration_time'][int(no_of_agents-1)] = float(end_time-start_time)
+        
+        if verbose: print("Old number of tries:", exploration_data['no_of_tries'][int(no_of_agents-1)])
+        exploration_data['no_of_tries'][int(no_of_agents-1)] += 1
+        if verbose: print("New number of tries:", exploration_data['no_of_tries'][int(no_of_agents-1)])
 
         exploration_data.to_csv(os.path.join(temp_complete_path, complexity_level + '.csv'), index=None)
         
         temp_no_of_agents_list = []
         temp_time_list = []
-
 
         for i in range(len(exploration_data)):
             if exploration_data.iloc[i]['exploration_time'] != np.nan or exploration_data.iloc[i]['exploration_time'] != 0 or exploration_data.iloc[i]['exploration_time'] != np.inf:
