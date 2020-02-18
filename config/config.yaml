@@ -2,8 +2,8 @@
 
 verbose: False
 show_results: False
-no_of_agents: 5
+no_of_agents: 8
 sensor_range: 45
 # grid_len: 612
 # grid_width: 612
-complexity_level: 'very_easy' # very_easy,easy,moderate,difficult
+complexity_level: 'difficult' # very_easy,easy,moderate,difficult
