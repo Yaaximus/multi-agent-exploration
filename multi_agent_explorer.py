@@ -253,16 +253,17 @@ def time_stats(start_time, mission_complete_status):
         temp_time_list = []
 
         for i in range(len(exploration_data)):
-            if exploration_data.iloc[i]['exploration_time'] != np.nan or exploration_data.iloc[i]['exploration_time'] != 0 or exploration_data.iloc[i]['exploration_time'] != np.inf:
-                temp_no_of_agents_list.append(exploration_data.iloc[i]['no_of_agents'])
-                temp_time_list.append(exploration_data.iloc[i]['exploration_time'])
+            if not math.isnan(exploration_data.iloc[i]['exploration_time']) and not math.isinf(exploration_data.iloc[i]['exploration_time']):
+                if int(exploration_data.iloc[i]['exploration_time']) != 0:
+                    temp_no_of_agents_list.append(exploration_data.iloc[i]['no_of_agents'])
+                    temp_time_list.append(exploration_data.iloc[i]['exploration_time'])
 
         plt.figure()
         plt.plot(temp_no_of_agents_list, temp_time_list, 'bo')
         plt.plot(temp_no_of_agents_list, temp_time_list, 'b-')
-        plt.savefig(os.path.join(path_to_save_results, 'agent_vs_time_plot.png'))
         plt.xlabel('Number of Agents')
         plt.ylabel('Time(sec)')
+        plt.savefig(os.path.join(path_to_save_results, 'agent_vs_time_plot.png'))
         
         if show_results:
             plt.show()
@@ -272,8 +273,6 @@ def time_stats(start_time, mission_complete_status):
 
 
 def main():
-
-    start_time = time.time()
 
     if verbose:
         print("-----------------------------------------------------------")
@@ -303,6 +302,8 @@ def main():
         temp_grid_with_regions, temp_graph_list, temp_grid_with_nodes, temp_color_map)
     
     # ------------------------- Explorer --------------------------- #
+
+    start_time = time.time()
     
     explorer = Explorer(global_grid=temp_occupancy_grid_with_obs, known_grid=temp_occupancy_grid_without_obs, \
                         assigned_region_node_names=goal_pos, graph_list=temp_graph_list, \

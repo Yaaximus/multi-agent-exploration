@@ -1,5 +1,6 @@
 .vscode/
+images/
 **.pyc
-**.jpg
-**.png
+# **.jpg
+# **.png
 **.tar.gz
