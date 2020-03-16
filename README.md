@@ -1,16 +1,16 @@
 # PYTHO IMPLEMENTATION OF MULTI AGENT EXPLORATION
 
-## Grid Type: Difficult
+## Grid Type: Easy
 ### Number of Agents: 8
+### Number of Unknown Obstacle: 1
+
+![8_Agents_grid_easy](https://user-images.githubusercontent.com/37571161/74771788-9b36c100-52b0-11ea-8e95-44fe7bc0c07b.gif)
+
+## Grid Type: Difficult
+### Number of Agents: 4
 ### Number of Unknown Obstacle: 4
 
 ![8_Agents_grid_difficult](https://user-images.githubusercontent.com/37571161/74771883-cde0b980-52b0-11ea-9bd4-aec19c580527.gif)
-
-## Grid Type: Easy
-### Number of Agents: 8
-### Number of Unknown Obstacle: 4
-
-![8_Agents_grid_easy](https://user-images.githubusercontent.com/37571161/74771788-9b36c100-52b0-11ea-8e95-44fe7bc0c07b.gif)
 
 ## Grid Type: Easy 
 ### Number of Agents: 1
